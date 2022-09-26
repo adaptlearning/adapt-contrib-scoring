@@ -1,8 +1,7 @@
-import Adapt from './adapt';
-import Logging from './logging';
+import Adapt from 'core/js/adapt';
+import Logging from 'core/js/logging';
 import OfflineStorage from 'core/js/offlineStorage';
-import scoring from './scoring';
-import {
+import scoring, {
   filterModels,
   getScaledScoreFromMinMax,
   getSubsets,
@@ -10,21 +9,21 @@ import {
   getSubsetsByModelId,
   getSubsetById,
   getSubSetByPath
-} from './utils';
+} from './adapt-contrib-scoring';
 import Backbone from 'backbone';
 
 /**
  * The class provides an abstract that describes a set of models which can be extended with custom
  * scoring and completion behaviour.
- * Derivative class instances should act as both a root set of models (assessment-blocks) and an
- * intersected set of models (retention-question-components vs assessment-blocks).
+ * Derivative class instances should act as both a root set of models (test-blocks) and an
+ * intersected set of models (retention-question-components vs test-blocks).
  * Set intersections are performed by comparing overlapping hierachies, such that a model will be
  * considered in both sets when it is equal to, a descendant of or an ancestor of a model in the intersecting
- * set. An assessment-block may contain a retention-question-component, a retention-question-component
- * may be contained in an assessment-block and an assessment-block may be equal to an assessment-block.
+ * set. A test-block may contain a retention-question-component, a retention-question-component
+ * may be contained in a test-block and a test-block may be equal to a test-block.
  * The last intersected set will always provide the returned set Class pertaining to its abstraction,
- * such that retention-question-components vs assessment-blocks would always give a subset of
- * assessment-blocks whereas assessment-blocks vs retention-question-components will always
+ * such that retention-question-components vs test-blocks would always give a subset of
+ * test-blocks whereas test-blocks vs retention-question-components will always
  * give a subset of retention-question-components.
  * Intersected sets will always only include models from their prospective set.
  */

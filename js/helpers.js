@@ -1,4 +1,4 @@
-import Data from '../../../core/js/data';
+import Data from 'core/js/data';
 import Handlebars from 'handlebars';
 // import {
 //   getSubsetById

@@ -1,12 +1,28 @@
-import Adapt from '../../../core/js/adapt';
-import Data from '../../../core/js/data';
+import Adapt from 'core/js/adapt';
+import Data from 'core/js/data';
 import {
+  filterModels,
+  filterIntersectingHierarchy,
+  hasIntersectingHierarchy,
+  getSubsets,
   getSubsetById,
   getSubsetsByType,
   getSubsetsByModelId,
   getSubSetByPath,
   getScaledScoreFromMinMax
 } from './utils';
+
+export {
+  filterModels,
+  filterIntersectingHierarchy,
+  hasIntersectingHierarchy,
+  getSubsets,
+  getSubsetById,
+  getSubsetsByType,
+  getSubsetsByModelId,
+  getSubSetByPath,
+  getScaledScoreFromMinMax
+};
 
 /**
  * API for creating completion and scoring model sets

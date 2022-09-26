@@ -1,4 +1,4 @@
-import Adapt from '../../../core/js/adapt';
+import Adapt from 'core/js/adapt';
 
 /** @typedef {import("./ScoringSet").default} ScoringSet */
 
