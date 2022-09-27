@@ -1,4 +1,5 @@
 import Adapt from 'core/js/adapt';
+import data from 'core/js/data';
 
 /** @typedef {import("./ScoringSet").default} ScoringSet */
 
@@ -10,29 +11,12 @@ import Adapt from 'core/js/adapt';
  */
 export function filterModels(set, models) {
   if (!models) return null;
-  // @todo: use Set to remove duplicates?
-  // models = [...new Set(models)];
-  models = _.uniq(models, model => model.get('_id'));
-
-  if (set.subsetParent && set.subsetParent.models) {
+  models = [...new Set(models)];
+  if (set.subsetParent?.models) {
     // Return only this set's items intersecting with or with intersecting descendants or ancestors from the parent list
     models = filterIntersectingHierarchy(models, set.subsetParent.models);
   }
-
-  return models.filter(model => model.get('_isAvailable'));
-}
-
-/**
- * Returns the percentage position of score between minScore and maxScore
- * @param {Number} score
- * @param {Number} minScore
- * @param {Number} maxScore
- * @returns {Number}
- */
-export function getScaledScoreFromMinMax(score, minScore, maxScore) {
-  const range = maxScore - minScore;
-  const relativeScore = score - minScore;
-  return Math.round((relativeScore / range) * 100);
+  return models.filter(isAvailableInHierarchy);
 }
 
 /**
@@ -44,7 +28,6 @@ export function getScaledScoreFromMinMax(score, minScore, maxScore) {
 export function filterIntersectingHierarchy(listA, listB) {
   const listBModels = listB.reduce((allDescendents, model) => allDescendents.concat([model], model.getAllDescendantModels()), []);
   const listBModelsIndex = _.indexBy(listBModels, model => model.get('_id'));
-
   return listA.filter(model => {
     const isADescendentOfB = listBModelsIndex[model.get('_id')];
     if (isADescendentOfB) return true;
@@ -60,12 +43,11 @@ export function filterIntersectingHierarchy(listA, listB) {
  * Return a boolean to indicate if any model from listA is present in listB, is a descendents of listB or has listB models as descendents
  * @param {[Backbone.Model]} listA
  * @param {[Backbone.Model]} listB
- * @returns {Boolean}
+ * @returns {boolean}
  */
 export function hasIntersectingHierarchy(listA, listB) {
   const listBModels = listB.reduce((allDescendents, model) => allDescendents.concat([model], model.getAllDescendantModels()), []);
   const listBModelsIndex = _.indexBy(listBModels, model => model.get('_id'));
-
   return Boolean(listA.find(model => {
     const isADescendentOfB = listBModelsIndex[model.get('_id')];
     if (isADescendentOfB) return true;
@@ -85,7 +67,6 @@ export function hasIntersectingHierarchy(listA, listB) {
  */
 export function createIntersectionSubset(sets) {
   const subsetParent = sets[0];
-
   return sets.slice(1).reduce((subsetParent, set) => {
     if (!set) return subsetParent;
     const Class = Object.getPrototypeOf(set).constructor;
@@ -110,72 +91,63 @@ export function getRawSets(excludeParent = null) {
  */
 export function getSubsets(subsetParent = undefined) {
   let sets = getRawSets(subsetParent);
-
   if (subsetParent) {
     // Create intersection sets between the found sets and the subsetParent
     sets = sets.map(set => createIntersectionSubset([subsetParent, set]));
   }
-
   return sets;
 }
 
 /**
  * Returns all root set of type or the intersection sets from subsetParent of type
- * @param {String} type
+ * @param {string} type
  * @param {ScoringSet} [subsetParent]
  * @returns {[ScoringSet]}
  */
 export function getSubsetsByType(type, subsetParent = undefined) {
   let sets = getRawSets(subsetParent).filter(set => type === set.type);
-
   if (subsetParent) {
     // Create intersection sets between the found sets and the subsetParent
     sets = sets.map(set => createIntersectionSubset([subsetParent, set]));
   }
-
   return sets;
 }
 
 /**
  * Returns all root sets or the intersection sets from subsetParent which also intersect the given model
- * @param {String} id
+ * @param {string} id
  * @param {ScoringSet} [subsetParent]
  * @returns {[ScoringSet]}
  */
 export function getSubsetsByModelId(id, subsetParent = undefined) {
-  // @todo: elsewhere data is used to find models
-  const models = [Adapt.findById(id)];
+  const models = [data.findById(id)];
   let sets = getRawSets(subsetParent).filter(set => hasIntersectingHierarchy(set.models, models));
-
   if (subsetParent) {
     // Create intersection sets between the found sets and the subsetParent
     sets = sets.map(set => createIntersectionSubset([subsetParent, set]));
   }
-
   return sets;
 }
 
 /**
  * Returns the root set by id or the intersection from the subsetParent by id
- * @param {String} id
+ * @param {string} id
  * @param {ScoringSet} [subsetParent]
  * @returns {ScoringSet}
  */
 export function getSubsetById(id, subsetParent = undefined) {
   const sets = getRawSets(subsetParent);
   let set = sets.find(set => id === set.id);
-
   if (subsetParent) {
     // Create an intersection set between the found set and the subsetParent
     set = createIntersectionSubset([subsetParent, set]);
   }
-
   return set;
 }
 
 /**
  * Create intersection subset from an id path
- * @param {[String]|String} path
+ * @param {[string]|string} path
  * @param {ScoringSet} [subsetParent]
  * @returns {ScoringSet}
  */
@@ -184,15 +156,32 @@ export function getSubSetByPath(path, subsetParent = undefined) {
     // Allow 'id.id.id' style lookup
     path = path.split('.');
   }
-
   // Fetch all of the sets named in the path in order
   const sets = path.map(id => getSubsetById(id));
-
   if (subsetParent) {
     // Add subsetParent as the starting set
     sets.unshift(subsetParent);
   }
-
   // Create an intersection set from all found sets in order
   return createIntersectionSubset(sets);
+}
+
+/**
+ * Returns the percentage position of score between a positive minScore or zero and maxScore
+ * A negative percentage correct is not possible with this function
+ * @param {number} score
+ * @param {number} minScore
+ * @param {number} maxScore
+ * @returns {number}
+ */
+export function getScaledScoreFromMinMax(score, minScore, maxScore) {
+  // Ensure minScore cannot be less than zero as negtive percentage correct makes no sense
+  if (minScore < 0) minScore = 0;
+  const range = maxScore - minScore;
+  const relativeScore = score - minScore;
+  return Math.round((relativeScore / range) * 100);
+}
+
+export function isAvailableInHierarchy(model) {
+  return model.getAncestorModels(true).every(model => model.get('_isAvailable'));
 }

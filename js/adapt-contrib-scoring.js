@@ -1,27 +1,34 @@
+import Backbone from 'backbone';
 import Adapt from 'core/js/adapt';
-import Data from 'core/js/data';
+import data from 'core/js/data';
 import {
   filterModels,
   filterIntersectingHierarchy,
   hasIntersectingHierarchy,
+  createIntersectionSubset,
+  getRawSets,
   getSubsets,
   getSubsetById,
   getSubsetsByType,
   getSubsetsByModelId,
   getSubSetByPath,
-  getScaledScoreFromMinMax
+  getScaledScoreFromMinMax,
+  isAvailableInHierarchy
 } from './utils';
 
 export {
   filterModels,
   filterIntersectingHierarchy,
   hasIntersectingHierarchy,
+  createIntersectionSubset,
+  getRawSets,
   getSubsets,
   getSubsetById,
   getSubsetsByType,
   getSubsetsByModelId,
   getSubSetByPath,
-  getScaledScoreFromMinMax
+  getScaledScoreFromMinMax,
+  isAvailableInHierarchy
 };
 
 /**
@@ -35,25 +42,24 @@ class Scoring extends Backbone.Controller {
      * @type {ScoringSet}
      */
     this._rawSets = [];
-
-    this.listenTo(Adapt, {
-      'adapt:start': this.onAdaptStart
-    });
+    this.listenTo(Adapt, 'adapt:start', this.onAdaptStart);
   }
 
-  /**
-   * @todo Any data change causes all sets to update. Should this be limited to changes to each sets intersecting data?
-   * @todo Limit to components only - Assessments use blocks so wouldn't work?
-   * @todo Exclude `_isOptional` models - wouldn't factor in role selector changes etc.?
-   */
-  _setupListeners() {
-    const debouncedUpdate = _.debounce(this.update, 100);
+  onAdaptStart() {
+    // delay any listeners until all data has been restored
+    this._setupListeners();
+    this.init();
+    this.update();
+  }
 
-    this.listenTo(Data, {
-      'change:_isAvailable': debouncedUpdate,
-      // 'bubble:change:_isInteractionComplete': debouncedUpdate
-      'change:_isInteractionComplete': debouncedUpdate
-    });
+  _setupListeners() {
+    this._debouncedUpdate = _.debounce(this.update, 50);
+    this._queuedChanges = [];
+    const updateQueue = model => {
+      this._queuedChanges.push(model);
+      this._debouncedUpdate();
+    };
+    this.listenTo(data, 'change:_isAvailable change:_isInteractionComplete', updateQueue);
   }
 
   init() {
@@ -62,12 +68,17 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Force all registered sets to recalculate their states
-   * @todo Add a different event if the score was changed rather than recalculated?
    * @fires Adapt#scoring:update
    * @property {Scoring}
    */
   update() {
-    this.subsets.forEach(set => set.update());
+    const updateSubsets = !this._queuedChanges?.length
+      ? this.subsets
+      : this._queuedChanges.reduce((updateSubsets, model) => updateSubsets.concat(getSubsetsByModelId(model?.get('_id'))), []);
+    const containersLastSorted = updateSubsets.sort((a, b) => (a._isContainer && 1) - (b._isContainer && 1));
+    containersLastSorted.forEach(set => set.update());
+    this._queuedChanges.length = 0;
+    if (!updateSubsets.length) return;
     Adapt.trigger('scoring:update', this);
   }
 
@@ -119,7 +130,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns all registered root sets of type
-   * @param {String} type
+   * @param {string} type
    * @returns {[ScoringSet]}
    */
   getSubsetsByType(type) {
@@ -128,7 +139,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns all registered root sets intersecting the given model id
-   * @param {String} id
+   * @param {string} id
    * @returns {[ScoringSet]}
    */
   getSubsetsByModelId(id) {
@@ -137,7 +148,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns a registered root sets by id
-   * @param {String} id
+   * @param {string} id
    * @returns {ScoringSet}
    */
   getSubsetById(id) {
@@ -146,7 +157,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns a root set or intersection set by path
-   * @param {String|[String]} path
+   * @param {string|[string]} path
    * @returns {ScoringSet}
    */
   getSubsetByPath(path) {
@@ -155,7 +166,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns the sum of all `_isScoreIncluded` root models `minScore` values
-   * @returns {Number}
+   * @returns {number}
    */
   get minScore() {
     return this.scoringSets.reduce((minScore, set) => minScore + set.minScore, 0);
@@ -163,7 +174,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns the sum of all `_isScoreIncluded` root models `maxScore` values
-   * @returns {Number}
+   * @returns {number}
    */
   get maxScore() {
     return this.scoringSets.reduce((maxScore, set) => maxScore + set.maxScore, 0);
@@ -171,7 +182,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns the sum of all `_isScoreIncluded` root models score values
-   * @returns {Number}
+   * @returns {number}
    */
   get score() {
     return this.scoringSets.reduce((score, set) => score + set.score, 0);
@@ -179,7 +190,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns the percentage position of score between `minScore` and `maxScore`
-   * @returns {Number}
+   * @returns {number}
    */
   get scaledScore() {
     return getScaledScoreFromMinMax(this.score, this.minScore, this.maxScore);
@@ -187,17 +198,10 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns a boolean indication if all root sets marked with `_isCompletionRequired` are completed
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   get isComplete() {
     return !this.completionSets.find(set => !set.isComplete);
-  }
-
-  onAdaptStart() {
-    // delay any listeners until all data has been restored
-    this._setupListeners();
-    this.init();
-    this.update();
   }
 
 }

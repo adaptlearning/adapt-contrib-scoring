@@ -8,7 +8,8 @@ import scoring, {
   getSubsetsByType,
   getSubsetsByModelId,
   getSubsetById,
-  getSubSetByPath
+  getSubSetByPath,
+  isAvailableInHierarchy
 } from './adapt-contrib-scoring';
 import Backbone from 'backbone';
 
@@ -32,17 +33,19 @@ export default class ScoringSet extends Backbone.Controller {
   initialize({
     _id = null,
     _type = null,
-    _title = '',
+    title = '',
     _isScoreIncluded = false,
-    _isCompletionRequired = false
+    _isCompletionRequired = false,
+    _isContainer = false
   } = {}, subsetParent = null) {
     this._subsetParent = subsetParent;
     this._id = _id;
     this._type = _type;
-    this._title = _title;
+    this._title = title;
     this._isScoreIncluded = _isScoreIncluded;
     this._isCompletionRequired = _isCompletionRequired;
-    // only register root sets as subsets are dynamically created when required
+    this._isContainer = _isContainer;
+    // Only register root sets as subsets are dynamically created when required
     if (!this._subsetParent) this.register();
     this._setupListeners();
   }
@@ -55,14 +58,15 @@ export default class ScoringSet extends Backbone.Controller {
    * @protected
    */
   _setupListeners() {
-    if (OfflineStorage.ready) {
-      this.onOfflineStorageReady();
-    } else {
-      this.listenTo(Adapt, {
-        'offlineStorage:ready': this.onOfflineStorageReady
-      });
-    }
+    if (OfflineStorage.ready) return this.restore();
+    this.listenTo(Adapt, 'offlineStorage:ready', this.restore);
   }
+
+  /**
+   * Restore data from previous sessions
+   * @listens Adapt#offlineStorage:ready
+   */
+  restore() {}
 
   init() {
     this._wasComplete = this.isComplete;
@@ -70,13 +74,7 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * Restore data from previous sessions
-   */
-  restore() {}
-
-  /**
    * Executed on data changes
-   * @todo A change to any set causes all of them to update. Should this be limited to changes to its own associated data?
    */
   update() {
     const isComplete = this.isComplete;
@@ -88,12 +86,17 @@ export default class ScoringSet extends Backbone.Controller {
     Adapt.trigger('scoring:set:update', this);
   }
 
+  /**
+   * Filter modules by intersection
+   * @param {Backbone.Model} models
+   * @returns {Array<Backbone.Model>}
+   */
   filterModels(models) {
     return filterModels(this, models);
   }
 
   /**
-   * @param {String} setId
+   * @param {string} setId
    * @returns {[ScoringSet]}
    */
   getSubsetById(setId) {
@@ -101,7 +104,7 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * @param {String} setType
+   * @param {string} setType
    * @returns {[ScoringSet]}
    */
   getSubsetsByType(setType) {
@@ -109,7 +112,7 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * @param {String} modelId
+   * @param {string} modelId
    * @returns {[ScoringSet]}
    */
   getSubsetsByModelId(modelId) {
@@ -117,7 +120,7 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * @param {String|[String]} path
+   * @param {string|[string]} path
    * @returns {[ScoringSet]}
    */
   getSubsetByPath(path) {
@@ -133,11 +136,9 @@ export default class ScoringSet extends Backbone.Controller {
     return subset.filter(set => set.models.length > 0);
   }
 
-  getScoreByModelId(modelId) {
-    const model = this.models.find(model => model.get('_id') === modelId);
-    this._getScoreByModel(model);
-  }
-
+  /**
+   * Returns the parent set if a dynamically created query set
+   */
   get subsetParent() {
     return this._subsetParent;
   }
@@ -160,7 +161,7 @@ export default class ScoringSet extends Backbone.Controller {
 
   /**
    * Returns whether the set needs to be completed
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   get isCompletionRequired() {
     return this._isCompletionRequired;
@@ -176,6 +177,33 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Returns all `_isAvailable` component models
+   * @returns {[ComponentModel]}
+   */
+  get components() {
+    return this.models.reduce((components, model) => {
+      model.isTypeGroup('component') ? components.push(model) : components.push(...model.findDescendantModels('component'));
+      return components;
+    }, []).filter(isAvailableInHierarchy);
+  }
+
+  /**
+   * Returns all `_isAvailable` question models
+   * @returns {[QuestionModel]}
+   */
+  get questions() {
+    return this.components.filter(model => model.isTypeGroup('question'));
+  }
+
+  /**
+   * Returns all `_isAvailable` presentation component models
+   * @returns {[QuestionModel]}
+   */
+  get presentationComponents() {
+    return this.components.filter(model => !model.isTypeGroup('question'));
+  }
+
+  /**
    * Returns all prospective subsets
    * @returns {[ScoringSet]}
    */
@@ -184,16 +212,8 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * Return all subsets marked with `_isScoreIncluded`
-   * @returns {[ScoringSet]}
-   */
-  get scoringSets() {
-    return this.subsets.filter(({ isScoreIncluded }) => isScoreIncluded);
-  }
-
-  /**
    * Returns the minimum score
-   * @returns {Number}
+   * @returns {number}
    */
   get minScore() {
     Logging.error(`minScore must be overriden for ${this.constructor.name}`);
@@ -201,7 +221,7 @@ export default class ScoringSet extends Backbone.Controller {
 
   /**
    * Returns the maxiumum score
-   * @returns {Number}
+   * @returns {number}
    */
   get maxScore() {
     Logging.error(`maxScore must be overriden for ${this.constructor.name}`);
@@ -209,16 +229,16 @@ export default class ScoringSet extends Backbone.Controller {
 
   /**
    * Returns the score
-   * @returns {Number}
+   * @returns {number}
    */
   get score() {
     Logging.error(`score must be overriden for ${this.constructor.name}`);
   }
 
   /**
-   * Returns a percentage score relative to the minimum and maximum values
-   * @todo If minScore < 0 the starting scaledScore will be > 0 - scaled scored between 0 - 100 or -100 - 100?
-   * @returns {Number}
+   * Returns a percentage score relative to a positive minimum or zero and maximum values
+   * A negative percentage correct is not possible with this function
+   * @returns {number}
    */
   get scaledScore() {
     return getScaledScoreFromMinMax(this.score, this.minScore, this.maxScore);
@@ -226,16 +246,16 @@ export default class ScoringSet extends Backbone.Controller {
 
   /**
    * Returns a score as a string to include "+" operator for positive scores
-   * @returns {String}
+   * @returns {string}
    */
-  get scoreAsString() {
+  get scoreAsstring() {
     const score = this.score;
     return (score > 0) ? `+${score.toString()}` : score.toString();
   }
 
   /**
    * Returns whether the set is completed
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   get isComplete() {
     Logging.error(`isComplete must be overriden for ${this.constructor.name}`);
@@ -243,27 +263,10 @@ export default class ScoringSet extends Backbone.Controller {
 
   /**
    * Returns whether the configured passmark has been achieved
-   * @returns {Boolean}
+   * @returns {boolean}
    */
   get isPassed() {
     Logging.error(`isPassed must be overriden for ${this.constructor.name}`);
-  }
-
-  /**
-   * Override this property to return a score for a specific model
-   * @protected
-   * @param {Backbone.Model} model
-   * @returns {Number}
-   */
-  _getScoreByModel(model) {
-    Logging.error(`_getScoreByModel must be overriden for ${this.constructor.name}`);
-  }
-
-  /**
-   * @listens Adapt#offlineStorage:ready
-   */
-  onOfflineStorageReady() {
-    this.restore();
   }
 
   /**
