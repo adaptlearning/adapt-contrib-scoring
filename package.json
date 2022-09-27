@@ -1,7 +1,7 @@
 {
   "name": "adapt-contrib-scoring",
-  "version": "5.0.0-dev",
-  "framework": ">=5.20-dev",
+  "version": "0.0.1",
+  "framework": ">=5.20",
   "homepage": "https://github.com/cgkineo/adapt-contrib-scoring",
   "issues": "https://github.com/cgkineo/adapt-contrib-scoring/issues/new",
   "extension" : "scoring",
