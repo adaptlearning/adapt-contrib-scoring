@@ -12,6 +12,8 @@ import {
   getSubsetsByType,
   getSubsetsByModelId,
   getSubSetByPath,
+  getSubsetsByQuery,
+  getStateObjectsByQuery,
   getScaledScoreFromMinMax,
   isAvailableInHierarchy
 } from './utils';
@@ -27,6 +29,8 @@ export {
   getSubsetsByType,
   getSubsetsByModelId,
   getSubSetByPath,
+  getSubsetsByQuery,
+  getStateObjectsByQuery,
   getScaledScoreFromMinMax,
   isAvailableInHierarchy
 };
@@ -157,11 +161,28 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns a root set or intersection set by path
-   * @param {string|[string]} path
+   * @param {string} path
    * @returns {ScoringSet}
    */
   getSubsetByPath(path) {
     return getSubSetByPath(path);
+  }
+
+  /**
+   * Returns sets or intersection sets by query
+   * @param {string} query
+   * @returns {ScoringSet}
+   */
+  getSubsetsByQuery(query) {
+    return getSubsetsByQuery(query);
+  }
+
+  /**
+   * @param {string} query
+   * @returns {[object]}
+   */
+  getStateObjectsByQuery(query) {
+    return getStateObjectsByQuery(query);
   }
 
   /**

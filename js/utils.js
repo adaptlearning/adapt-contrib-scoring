@@ -1,3 +1,4 @@
+import Backbone from 'backbone';
 import Adapt from 'core/js/adapt';
 import data from 'core/js/data';
 
@@ -67,6 +68,7 @@ export function hasIntersectingHierarchy(listA, listB) {
  */
 export function createIntersectionSubset(sets) {
   const subsetParent = sets[0];
+  if (sets.length === 1) return subsetParent;
   return sets.slice(1).reduce((subsetParent, set) => {
     if (!set) return subsetParent;
     const Class = Object.getPrototypeOf(set).constructor;
@@ -182,6 +184,117 @@ export function getScaledScoreFromMinMax(score, minScore, maxScore) {
   return Math.round((relativeScore / range) * 100);
 }
 
+/**
+ * @param {Backbone.Model} model
+ * @returns {boolean}
+ */
 export function isAvailableInHierarchy(model) {
   return model.getAncestorModels(true).every(model => model.get('_isAvailable'));
+}
+
+/**
+ * Returns an array of all combinations of the matrix row values
+ * @param {[[any]]} matrix
+ * @returns {[any]}
+ */
+export function matrixMultiply (matrix) {
+  const partLengths = matrix.map(part => part.length); // how large each part is
+  const subPartIndices = '0'.repeat(matrix.length).split('').map(Number); // how far we've gone in each part
+  let isEnded = false;
+  const sumsToPerform = [];
+  while (isEnded === false) {
+    sumsToPerform.push(subPartIndices.reduce((sum, subPartIndex, partIndex) => {
+      sum.push(matrix[partIndex][subPartIndex]);
+      return sum;
+    }, []));
+    isEnded = !subPartIndices.some((subPartIndex, partIndex) => {
+      subPartIndex++;
+      if (subPartIndex < partLengths[partIndex]) {
+        subPartIndices[partIndex] = subPartIndex;
+        return true;
+      }
+      subPartIndices[partIndex] = 0;
+      return false;
+    });
+  }
+  return sumsToPerform;
+}
+
+const attributePathRegEx = /\[([^\]]+)\]/g;
+/**
+ * Takes a subset intersection query string and transforms it into an array of filter objects
+ * @param {string} query
+ * @returns {[[{}]]}
+ */
+export function parseQuery(query = '') {
+  const queryMajors = query.split(/([^ []+\[[^\]]+\]*)/).map(section => section.trim()).filter(Boolean);
+  const filterParts = queryMajors.map(queryMajor => {
+    const attributeQueryParts = queryMajor.match(attributePathRegEx);
+    const openingQueryPart = queryMajor.replace(attributePathRegEx, '');
+    const majorFilterPart = [];
+    if (openingQueryPart[0] === '#') {
+      // select by id
+      majorFilterPart.push({
+        id: openingQueryPart.slice(1)
+      });
+    } else {
+      // select by type
+      majorFilterPart.push({
+        type: openingQueryPart
+      });
+    }
+    if (attributeQueryParts) {
+      const attributeFilterParts = attributeQueryParts.map(attributeQueryPart => {
+        const attributeQueryPartMiddle = attributeQueryPart.slice(1, -1);
+        const attributeQueryPartSections = attributeQueryPartMiddle.split(',').map(section => section.trim()).filter(Boolean);
+        const attributeFilterPart = attributeQueryPartSections.map(section => {
+          const [name, value] = section.split('=').map(section => section.trim()).filter(Boolean);
+          return { [name]: value };
+        });
+        return attributeFilterPart;
+      });
+      const majorTimesAttributeFilterParts = matrixMultiply([majorFilterPart, ...attributeFilterParts]);
+      const flattenedFilterObjects = majorTimesAttributeFilterParts.map(query => Object.assign({}, ...query));
+      return flattenedFilterObjects;
+    }
+    return majorFilterPart;
+  });
+  return filterParts;
+}
+
+/**
+ * Takes a subset intersection query string and returns the resultant intersected subsets
+ * @param {string} query
+ * @param {ScoringSet} [subsetParent]
+ * @returns {[ScoringSet]}
+ */
+export function getSubsetsByQuery(query, subsetParent = undefined) {
+  const allSubsets = getSubsets(subsetParent);
+  const parsedQueryMatrix = parseQuery(query);
+  const subsetQueryMatrix = parsedQueryMatrix.map((row) => row.map((filter) => {
+    // Apply modelIdFilter
+    const hasModelIdFilter = Object.prototype.hasOwnProperty.call(filter, 'modelId');
+    const filterSubsets = !hasModelIdFilter
+      ? allSubsets
+      : getSubsetsByModelId(filter.modelId, subsetParent);
+    if (hasModelIdFilter) delete filter.modelId;
+    // Return only filtered sets
+    return _.where(filterSubsets, filter);
+  }).flat());
+  const subsetQueryList = matrixMultiply(subsetQueryMatrix);
+  const subsets = subsetQueryList.map(subsetQueryItem => {
+    if (subsetParent) return createIntersectionSubset([subsetParent, ...subsetQueryItem]);
+    return createIntersectionSubset(subsetQueryItem);
+  });
+  return subsets;
+}
+
+/**
+ * Takes a subset intersection query string and returns the resultant subsets state objects
+ * @param {string} query
+ * @param {ScoringSet} [subsetParent]
+ * @returns {[object]}
+ */
+export function getStateObjectsByQuery(query, subsetParent = undefined) {
+  return getSubsetsByQuery(query, subsetParent).map(set => set.stateObject);
 }

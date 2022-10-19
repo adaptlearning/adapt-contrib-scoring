@@ -9,6 +9,8 @@ import scoring, {
   getSubsetsByModelId,
   getSubsetById,
   getSubSetByPath,
+  getSubsetsByQuery,
+  getStateObjectsByQuery,
   isAvailableInHierarchy
 } from './adapt-contrib-scoring';
 import Backbone from 'backbone';
@@ -125,6 +127,22 @@ export default class ScoringSet extends Backbone.Controller {
    */
   getSubsetByPath(path) {
     return getSubSetByPath(path, this);
+  }
+
+  /**
+   * @param {string} query
+   * @returns {[ScoringSet]}
+   */
+  getSubsetsByQuery(query) {
+    return getSubsetsByQuery(query, this);
+  }
+
+  /**
+   * @param {string} query
+   * @returns {[object]}
+   */
+  getStateObjectsByQuery(query) {
+    return getStateObjectsByQuery(query, this);
   }
 
   /**
@@ -251,6 +269,45 @@ export default class ScoringSet extends Backbone.Controller {
   get scoreAsstring() {
     const score = this.score;
     return (score > 0) ? `+${score.toString()}` : score.toString();
+  }
+
+  /**
+   * Returns the number of correctly answered questions
+   * @returns {number}
+   */
+  get correctness() {
+    Logging.error(`correctness must be overriden for ${this.constructor.name}`);
+  }
+
+  /**
+     * Returns the percentage of correctly answered questions
+     * @returns {number}
+     */
+  get scaledCorrectness() {
+    Logging.error(`scaledCorrectness must be overriden for ${this.constructor.name}`);
+  }
+
+  /**
+   * Returns an object representing the set state
+   * This is useful for rendering UI
+   * @returns {object}
+   */
+  get stateObject() {
+    return {
+      id: this.id,
+      type: this.type,
+      title: this.title,
+      isScoreIncluded: this.isScoreIncluded,
+      isCompletionRequired: this.isCompletionRequired,
+      minScore: this.minScore,
+      maxScore: this.maxScore,
+      score: this.score,
+      scaledScore: this.scaledScore,
+      correctness: this.correctness,
+      scaledCorrectness: this.scaledCorrectness,
+      isComplete: this.isComplete,
+      isPassed: this.isPassed
+    };
   }
 
   /**
