@@ -1,4 +1,3 @@
-import Backbone from 'backbone';
 import Adapt from 'core/js/adapt';
 import data from 'core/js/data';
 
@@ -198,6 +197,7 @@ export function isAvailableInHierarchy(model) {
  * @returns {[any]}
  */
 export function matrixMultiply (matrix) {
+  if (matrix.length === 0) return [];
   const partLengths = matrix.map(part => part.length); // how large each row is
   const subPartIndices = '0'.repeat(matrix.length).split('').map(Number); // how far we've gone in each row
   let isEnded = false;
@@ -271,16 +271,23 @@ export function parseQuery(query = '') {
 export function getSubsetsByQuery(query, subsetParent = undefined) {
   const allSubsets = getSubsets(subsetParent);
   const parsedQueryMatrix = parseQuery(query);
-  const subsetQueryMatrix = parsedQueryMatrix.map((row) => row.map((filter) => {
-    // Apply modelIdFilter
-    const hasModelIdFilter = Object.prototype.hasOwnProperty.call(filter, 'modelId');
-    const filterSubsets = !hasModelIdFilter
-      ? allSubsets
-      : getSubsetsByModelId(filter.modelId, subsetParent);
-    if (hasModelIdFilter) delete filter.modelId;
-    // Return only filtered sets
-    return _.where(filterSubsets, filter);
-  }).flat());
+  const subsetQueryMatrix = parsedQueryMatrix.map((row) => {
+    const subsets = row
+      .map((filter) => {
+        // Apply modelIdFilter
+        const hasModelIdFilter = Object.prototype.hasOwnProperty.call(filter, 'modelId');
+        const filterSubsets = !hasModelIdFilter
+          ? allSubsets
+          : getSubsetsByModelId(filter.modelId, subsetParent);
+        if (hasModelIdFilter) delete filter.modelId;
+        // Return only filtered sets
+        const attributeFilteredSubsets = _.where(filterSubsets, filter);
+        return attributeFilteredSubsets;
+      })
+      .flat();
+    if (!subsets.length) return null;
+    return subsets;
+  }).filter(Boolean);
   const intersectionQueryLists = matrixMultiply(subsetQueryMatrix);
   const intersectedSubsets = intersectionQueryLists.map(intersectionQueryList => {
     if (subsetParent) return createIntersectionSubset([subsetParent, ...intersectionQueryList]);
