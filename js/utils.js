@@ -198,8 +198,8 @@ export function isAvailableInHierarchy(model) {
  * @returns {[any]}
  */
 export function matrixMultiply (matrix) {
-  const partLengths = matrix.map(part => part.length); // how large each part is
-  const subPartIndices = '0'.repeat(matrix.length).split('').map(Number); // how far we've gone in each part
+  const partLengths = matrix.map(part => part.length); // how large each row is
+  const subPartIndices = '0'.repeat(matrix.length).split('').map(Number); // how far we've gone in each row
   let isEnded = false;
   const sumsToPerform = [];
   while (isEnded === false) {

@@ -161,7 +161,7 @@ class Scoring extends Backbone.Controller {
 
   /**
    * Returns a root set or intersection set by path
-   * @param {string} path
+   * @param {string|[string]} path
    * @returns {ScoringSet}
    */
   getSubsetByPath(path) {
