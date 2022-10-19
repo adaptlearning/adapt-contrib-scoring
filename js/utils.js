@@ -237,7 +237,7 @@ export function parseQuery(query = '') {
       majorFilterPart.push({
         id: openingQueryPart.slice(1)
       });
-    } else {
+    } else if (openingQueryPart) {
       // select by type
       majorFilterPart.push({
         type: openingQueryPart
