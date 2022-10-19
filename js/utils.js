@@ -281,12 +281,12 @@ export function getSubsetsByQuery(query, subsetParent = undefined) {
     // Return only filtered sets
     return _.where(filterSubsets, filter);
   }).flat());
-  const subsetQueryList = matrixMultiply(subsetQueryMatrix);
-  const subsets = subsetQueryList.map(subsetQueryItem => {
-    if (subsetParent) return createIntersectionSubset([subsetParent, ...subsetQueryItem]);
-    return createIntersectionSubset(subsetQueryItem);
+  const intersectionQueryLists = matrixMultiply(subsetQueryMatrix);
+  const intersectedSubsets = intersectionQueryLists.map(intersectionQueryList => {
+    if (subsetParent) return createIntersectionSubset([subsetParent, ...intersectionQueryList]);
+    return createIntersectionSubset(intersectionQueryList);
   });
-  return subsets;
+  return intersectedSubsets;
 }
 
 /**
