@@ -220,7 +220,7 @@ export function matrixMultiply (matrix) {
   return sumsToPerform;
 }
 
-const majorPartRegExp = /([^ []+(?:\[[^\]]+\])*)/g;
+const majorPartRegExp = /([^ []*(?:\[[^\]]+\])*)/g;
 const attributePartRegEx = /\[([^\]]+)\]/g;
 /**
  * Takes a subset intersection query string and transforms it into an array of filter objects
