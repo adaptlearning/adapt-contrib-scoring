@@ -1,6 +1,7 @@
 import Backbone from 'backbone';
 import Adapt from 'core/js/adapt';
 import data from 'core/js/data';
+import './helpers';
 import {
   filterModels,
   filterIntersectingHierarchy,

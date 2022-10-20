@@ -199,6 +199,7 @@ export function isAvailableInHierarchy(model) {
 export function matrixMultiply (matrix) {
   if (matrix.length === 0) return [];
   const partLengths = matrix.map(part => part.length); // how large each row is
+  if (partLengths.some(length => length === 0)) return []; // cannot multiply an empty row
   const subPartIndices = '0'.repeat(matrix.length).split('').map(Number); // how far we've gone in each row
   let isEnded = false;
   const sumsToPerform = [];
@@ -220,8 +221,8 @@ export function matrixMultiply (matrix) {
   return sumsToPerform;
 }
 
-const majorPartRegExp = /([^ []*(?:\[[^\]]+\])*)/g;
-const attributePartRegEx = /\[([^\]]+)\]/g;
+const majorPartRegExp = /([^ []*(?:[[(]{1}[^\])]+[\])]{1})*)/g;
+const attributePartRegEx = /[[(]{1}[^\])]+[\])]{1}/g;
 /**
  * Takes a subset intersection query string and transforms it into an array of filter objects
  * @param {string} query
@@ -245,7 +246,7 @@ export function parseQuery(query = '') {
       });
     }
     if (attributeQueryParts) {
-      const attributeFilterParts = attributeQueryParts.map(attributeQueryPart => {
+      const multiplyAttributeParts = attributeQueryParts.filter(part => part[0] === '[').map(attributeQueryPart => {
         const attributeQueryPartMiddle = attributeQueryPart.slice(1, -1);
         const attributeQueryPartSections = attributeQueryPartMiddle.split(',').map(section => section.trim()).filter(Boolean);
         const attributeFilterPart = attributeQueryPartSections.map(section => {
@@ -257,10 +258,25 @@ export function parseQuery(query = '') {
         });
         return attributeFilterPart;
       });
-      const majorTimesAttributeFilterParts = matrixMultiply([majorFilterPart, ...attributeFilterParts]);
-      const flattenedFilterObjects = majorTimesAttributeFilterParts.map(query => Object.assign({}, ...query));
-      return flattenedFilterObjects;
+      const filterAttributeParts = attributeQueryParts.filter(part => part[0] === '(').map(attributeQueryPart => {
+        const attributeQueryPartMiddle = attributeQueryPart.slice(1, -1);
+        const attributeQueryPartSections = attributeQueryPartMiddle.split(',').map(section => section.trim()).filter(Boolean);
+        const attributeFilterPart = attributeQueryPartSections.map(section => {
+          if (section[0] === '#') {
+            return { id: section.slice(1) };
+          }
+          const [name, value] = section.split('=').map(section => section.trim()).filter(Boolean);
+          return { [name]: value };
+        });
+        return attributeFilterPart;
+      });
+      const flattenedFilterAttributeObjects = filterAttributeParts.map(part => Object.assign({}, ...part));
+      const multipliedAttributeParts = matrixMultiply([majorFilterPart, ...multiplyAttributeParts].filter(item => item?.length));
+      const flattenedMultiplyObjects = multipliedAttributeParts.map(query => Object.assign({}, ...query));
+      flattenedMultiplyObjects.push(flattenedFilterAttributeObjects);
+      return flattenedMultiplyObjects;
     }
+    majorFilterPart.push([]);
     return majorFilterPart;
   });
   return filterParts;
@@ -273,40 +289,50 @@ export function parseQuery(query = '') {
  * @returns {[ScoringSet]}
  */
 export function getSubsetsByQuery(query, subsetParent = undefined) {
+  function applyFilter(filter, set) {
+    for (const k in filter) {
+      const setValue = set[k];
+      const filterValue = filter[k];
+      if (typeof setValue === 'function') {
+        if (!setValue.call(set, filterValue)) return false; // check for modelTypeGroup('question')
+        continue;
+      }
+      if (filterValue === undefined) {
+        if (!setValue) return false; // check for Boolean(isComplete)
+      } else if (setValue !== filterValue) {
+        return false; // check for id==='a-05'
+      }
+    }
+    return true;
+  }
   const allSubsets = getSubsets(subsetParent);
   const parsedQueryMatrix = parseQuery(query);
-  const subsetQueryMatrix = parsedQueryMatrix.map((row) => {
-    const subsets = row
-      .map((filter) => {
+  const subsetQueryMatrix = parsedQueryMatrix.map(row => {
+    const selectionFilters = row.slice(0, -1);
+    return selectionFilters
+      .map((selectionFilter) => {
         // Apply modelIdFilter
-        const hasModelIdFilter = Object.prototype.hasOwnProperty.call(filter, 'modelId');
+        const hasModelIdFilter = Object.prototype.hasOwnProperty.call(selectionFilter, 'modelId');
         const filterSubsets = !hasModelIdFilter
           ? allSubsets
-          : getSubsetsByModelId(filter.modelId, subsetParent);
-        if (hasModelIdFilter) delete filter.modelId;
+          : getSubsetsByModelId(selectionFilter.modelId, subsetParent);
+        if (hasModelIdFilter) delete selectionFilter.modelId;
         // Return only filtered sets
-        const attributeFilteredSubsets = filterSubsets.filter(set => {
-          for (const k in filter) {
-            const setValue = set[k];
-            const value = filter[k];
-            if (typeof setValue === 'function') {
-              if (!setValue.call(set, value)) return false;
-              continue;
-            }
-            if (setValue !== value) return false;
-          }
-          return true;
-        });
-        return attributeFilteredSubsets;
+        return filterSubsets.filter(set => applyFilter(selectionFilter, set));
       })
       .flat();
-    if (!subsets.length) return null;
-    return subsets;
-  }).filter(Boolean);
+  });
   const intersectionQueryLists = matrixMultiply(subsetQueryMatrix);
   const intersectedSubsets = intersectionQueryLists.map(intersectionQueryList => {
     if (subsetParent) return createIntersectionSubset([subsetParent, ...intersectionQueryList]);
     return createIntersectionSubset(intersectionQueryList);
   });
-  return intersectedSubsets;
+  let postFilteredSubsets = intersectedSubsets;
+  parsedQueryMatrix.forEach(row => {
+    const inclusionFilters = row.lastItem;
+    inclusionFilters.forEach(inclusionFilter => {
+      postFilteredSubsets = postFilteredSubsets.filter(set => applyFilter(inclusionFilter, set));
+    });
+  });
+  return postFilteredSubsets;
 }

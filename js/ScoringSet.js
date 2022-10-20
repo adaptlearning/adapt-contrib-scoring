@@ -143,7 +143,7 @@ class ScoringSet extends Backbone.Controller {
    * @returns {[ScoringSet]}
    */
   getPopulatedSubset(subset) {
-    return subset.filter(set => set.models.length > 0);
+    return subset.filter(set => set.isPopulated);
   }
 
   /**
@@ -194,6 +194,14 @@ class ScoringSet extends Backbone.Controller {
    */
   get models() {
     Logging.error(`models must be overriden for ${this.constructor.name}`);
+  }
+
+  /**
+   * Check to see if there are any child models
+   * @returns {boolean}
+   */
+  get isPopulated() {
+    return Boolean(this.models?.length);
   }
 
   /**
