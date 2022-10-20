@@ -249,6 +249,9 @@ export function parseQuery(query = '') {
         const attributeQueryPartMiddle = attributeQueryPart.slice(1, -1);
         const attributeQueryPartSections = attributeQueryPartMiddle.split(',').map(section => section.trim()).filter(Boolean);
         const attributeFilterPart = attributeQueryPartSections.map(section => {
+          if (section[0] === '#') {
+            return { id: section.slice(1) };
+          }
           const [name, value] = section.split('=').map(section => section.trim()).filter(Boolean);
           return { [name]: value };
         });
