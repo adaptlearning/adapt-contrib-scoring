@@ -299,7 +299,7 @@ export function getSubsetsByQuery(query, subsetParent = undefined) {
       }
       if (filterValue === undefined) {
         if (!setValue) return false; // check for Boolean(isComplete)
-      } else if (setValue !== filterValue) {
+      } else if (String(setValue) !== String(filterValue)) {
         return false; // check for id==='a-05'
       }
     }
