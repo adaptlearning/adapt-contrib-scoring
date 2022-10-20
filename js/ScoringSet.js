@@ -204,6 +204,10 @@ class ScoringSet extends Backbone.Controller {
     return Boolean(this.models?.length);
   }
 
+  get isNotPopulated() {
+    return Boolean(this.models?.length);
+  }
+
   /**
    * Returns all `_isAvailable` component models
    * @returns {[ComponentModel]}
@@ -305,12 +309,20 @@ class ScoringSet extends Backbone.Controller {
     Logging.error(`isComplete must be overriden for ${this.constructor.name}`);
   }
 
+  get isIncomplete() {
+    return (this.isComplete === false);
+  }
+
   /**
    * Returns whether the configured passmark has been achieved
    * @returns {boolean}
    */
   get isPassed() {
     Logging.error(`isPassed must be overriden for ${this.constructor.name}`);
+  }
+
+  get isFailed() {
+    return (this.isPassed === false);
   }
 
   /**

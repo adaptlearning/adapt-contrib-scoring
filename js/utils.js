@@ -327,6 +327,7 @@ export function getSubsetsByQuery(query, subsetParent = undefined) {
     if (subsetParent) return createIntersectionSubset([subsetParent, ...intersectionQueryList]);
     return createIntersectionSubset(intersectionQueryList);
   });
+  // TODO: might have to allow post filters on each row columns, such that [modelType=article](isComplete) test(isPassed) works
   let postFilteredSubsets = intersectedSubsets;
   parsedQueryMatrix.forEach(row => {
     const inclusionFilters = row.lastItem;
