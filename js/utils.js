@@ -299,13 +299,3 @@ export function getSubsetsByQuery(query, subsetParent = undefined) {
   });
   return intersectedSubsets;
 }
-
-/**
- * Takes a subset intersection query string and returns the resultant subsets state objects
- * @param {string} query
- * @param {ScoringSet} [subsetParent]
- * @returns {[object]}
- */
-export function getStateObjectsByQuery(query, subsetParent = undefined) {
-  return getSubsetsByQuery(query, subsetParent).map(set => set.stateObject);
-}

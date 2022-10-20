@@ -10,8 +10,8 @@ import scoring, {
   getSubsetById,
   getSubSetByPath,
   getSubsetsByQuery,
-  getStateObjectsByQuery,
-  isAvailableInHierarchy
+  isAvailableInHierarchy,
+  AdaptModelSet
 } from './adapt-contrib-scoring';
 import Backbone from 'backbone';
 
@@ -30,7 +30,7 @@ import Backbone from 'backbone';
  * give a subset of retention-question-components.
  * Intersected sets will always only include models from their prospective set.
  */
-export default class ScoringSet extends Backbone.Controller {
+class ScoringSet extends Backbone.Controller {
 
   initialize({
     _id = null,
@@ -138,14 +138,6 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * @param {string} query
-   * @returns {[object]}
-   */
-  getStateObjectsByQuery(query) {
-    return getStateObjectsByQuery(query, this);
-  }
-
-  /**
    * Returns subsets populated by child models
    * @param {ScoringSet} set
    * @returns {[ScoringSet]}
@@ -244,7 +236,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get minScore() {
-    Logging.error(`minScore must be overriden for ${this.constructor.name}`);
+    return this.questions.reduce((score, set) => score + set.minScore, 0);
   }
 
   /**
@@ -252,7 +244,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get maxScore() {
-    Logging.error(`maxScore must be overriden for ${this.constructor.name}`);
+    return this.questions.reduce((score, set) => score + set.maxScore, 0);
   }
 
   /**
@@ -260,7 +252,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get score() {
-    Logging.error(`score must be overriden for ${this.constructor.name}`);
+    return this.questions.reduce((score, set) => score + set.score, 0);
   }
 
   /**
@@ -286,7 +278,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get correctness() {
-    Logging.error(`correctness must be overriden for ${this.constructor.name}`);
+    return this.questions.reduce((count, model) => count + (model.get('_isCorrect') ? 1 : 0), 0);
   }
 
   /**
@@ -294,31 +286,7 @@ export default class ScoringSet extends Backbone.Controller {
      * @returns {number}
      */
   get scaledCorrectness() {
-    Logging.error(`scaledCorrectness must be overriden for ${this.constructor.name}`);
-  }
-
-  /**
-   * Returns an object representing the set state
-   * This is useful for rendering UI
-   * @returns {object}
-   */
-  get stateObject() {
-    return {
-      correctness: this.correctness,
-      id: this.id,
-      isComplete: this.isComplete,
-      isCompletionRequired: this.isCompletionRequired,
-      isPassed: this.isPassed,
-      isScoreIncluded: this.isScoreIncluded,
-      maxScore: this.maxScore,
-      minScore: this.minScore,
-      scaledCorrectness: this.scaledCorrectness,
-      scaledScore: this.scaledScore,
-      score: this.score,
-      subsetPath: this.subsetPath.map(subset => subset.id).join('.'),
-      title: this.title,
-      type: this.type
-    };
+    return getScaledScoreFromMinMax(this.correctness, 0, this.questions.length);
   }
 
   /**
@@ -348,3 +316,7 @@ export default class ScoringSet extends Backbone.Controller {
   onPassed() {}
 
 }
+
+Object.setPrototypeOf(AdaptModelSet.prototype, ScoringSet.prototype);
+
+export default ScoringSet;

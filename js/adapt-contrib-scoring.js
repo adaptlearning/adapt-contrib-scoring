@@ -13,10 +13,10 @@ import {
   getSubsetsByModelId,
   getSubSetByPath,
   getSubsetsByQuery,
-  getStateObjectsByQuery,
   getScaledScoreFromMinMax,
   isAvailableInHierarchy
 } from './utils';
+import AdaptModelSet from './AdaptModelSet';
 
 export {
   filterModels,
@@ -30,9 +30,9 @@ export {
   getSubsetsByModelId,
   getSubSetByPath,
   getSubsetsByQuery,
-  getStateObjectsByQuery,
   getScaledScoreFromMinMax,
-  isAvailableInHierarchy
+  isAvailableInHierarchy,
+  AdaptModelSet
 };
 
 /**
@@ -52,8 +52,13 @@ class Scoring extends Backbone.Controller {
   onAdaptStart() {
     // delay any listeners until all data has been restored
     this._setupListeners();
+    this.makeAdaptModelSets();
     this.init();
     this.update();
+  }
+
+  makeAdaptModelSets() {
+    data.forEach(model => this.register(new AdaptModelSet({ model })));
   }
 
   _setupListeners() {
@@ -175,14 +180,6 @@ class Scoring extends Backbone.Controller {
    */
   getSubsetsByQuery(query) {
     return getSubsetsByQuery(query);
-  }
-
-  /**
-   * @param {string} query
-   * @returns {[object]}
-   */
-  getStateObjectsByQuery(query) {
-    return getStateObjectsByQuery(query);
   }
 
   /**
