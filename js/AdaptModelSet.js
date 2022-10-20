@@ -14,6 +14,14 @@ export default class AdaptModelSet {
     this._subsetParent = subsetParent;
   }
 
+  get modelType() {
+    return this._model.get('_type');
+  }
+
+  get modelComponent() {
+    return this._model.get('_component');
+  }
+
   get models() {
     return this._models;
   }
