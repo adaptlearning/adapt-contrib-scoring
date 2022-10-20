@@ -161,6 +161,16 @@ export default class ScoringSet extends Backbone.Controller {
     return this._subsetParent;
   }
 
+  get subsetPath() {
+    let subject = this;
+    const path = [];
+    while (subject) {
+      path.push(subject);
+      subject = subject.subsetParent;
+    }
+    return path.reverse();
+  }
+
   get id() {
     return this._id;
   }
@@ -294,19 +304,20 @@ export default class ScoringSet extends Backbone.Controller {
    */
   get stateObject() {
     return {
-      id: this.id,
-      type: this.type,
-      title: this.title,
-      isScoreIncluded: this.isScoreIncluded,
-      isCompletionRequired: this.isCompletionRequired,
-      minScore: this.minScore,
-      maxScore: this.maxScore,
-      score: this.score,
-      scaledScore: this.scaledScore,
       correctness: this.correctness,
-      scaledCorrectness: this.scaledCorrectness,
+      id: this.id,
       isComplete: this.isComplete,
-      isPassed: this.isPassed
+      isCompletionRequired: this.isCompletionRequired,
+      isPassed: this.isPassed,
+      isScoreIncluded: this.isScoreIncluded,
+      maxScore: this.maxScore,
+      minScore: this.minScore,
+      scaledCorrectness: this.scaledCorrectness,
+      scaledScore: this.scaledScore,
+      score: this.score,
+      subsetPath: this.subsetPath.map(subset => subset.id).join('.'),
+      title: this.title,
+      type: this.type
     };
   }
 

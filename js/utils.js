@@ -220,17 +220,18 @@ export function matrixMultiply (matrix) {
   return sumsToPerform;
 }
 
-const attributePathRegEx = /\[([^\]]+)\]/g;
+const majorPartRegExp = /([^ []+(?:\[[^\]]+\])*)/g;
+const attributePartRegEx = /\[([^\]]+)\]/g;
 /**
  * Takes a subset intersection query string and transforms it into an array of filter objects
  * @param {string} query
  * @returns {[[{}]]}
  */
 export function parseQuery(query = '') {
-  const queryMajors = query.split(/([^ []+\[[^\]]+\]*)/).map(section => section.trim()).filter(Boolean);
+  const queryMajors = query.split(majorPartRegExp).map(section => section?.trim()).filter(Boolean);
   const filterParts = queryMajors.map(queryMajor => {
-    const attributeQueryParts = queryMajor.match(attributePathRegEx);
-    const openingQueryPart = queryMajor.replace(attributePathRegEx, '');
+    const attributeQueryParts = queryMajor.match(attributePartRegEx);
+    const openingQueryPart = queryMajor.replace(attributePartRegEx, '');
     const majorFilterPart = [];
     if (openingQueryPart[0] === '#') {
       // select by id
