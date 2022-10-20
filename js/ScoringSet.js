@@ -205,7 +205,7 @@ class ScoringSet extends Backbone.Controller {
   }
 
   get isNotPopulated() {
-    return Boolean(this.models?.length);
+    return (this.isPopulated === false);
   }
 
   /**
