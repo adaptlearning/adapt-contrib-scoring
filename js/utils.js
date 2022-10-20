@@ -65,13 +65,23 @@ export function hasIntersectingHierarchy(listA, listB) {
  * @param {[ScoringSet]} sets
  * @returns {ScoringSet}
  */
-export function createIntersectionSubset(sets) {
+export function createIntersectionSubset(sets, filters = null) {
   const subsetParent = sets[0];
+  const columnFilters = filters?.[0];
+  if (columnFilters && !applyFilters(columnFilters, subsetParent)) {
+    return null;
+  }
   if (sets.length === 1) return subsetParent;
-  return sets.slice(1).reduce((subsetParent, set) => {
+  return sets.slice(1).reduce((subsetParent, set, index) => {
+    if (!subsetParent) return null;
     if (!set) return subsetParent;
     const Class = Object.getPrototypeOf(set).constructor;
-    return new Class(set, subsetParent);
+    const queryInstance = new Class(set, subsetParent);
+    const columnFilters = filters?.[index + 1];
+    if (columnFilters && !applyFilters(columnFilters, queryInstance)) {
+      return null;
+    }
+    return queryInstance;
   }, subsetParent);
 }
 
@@ -282,6 +292,27 @@ export function parseQuery(query = '') {
   return filterParts;
 }
 
+export function applyFilter(filter, set) {
+  for (const k in filter) {
+    const setValue = set[k];
+    const filterValue = filter[k];
+    if (typeof setValue === 'function') {
+      if (!setValue.call(set, filterValue)) return false; // check for modelTypeGroup('question')
+      continue;
+    }
+    if (filterValue === undefined) {
+      if (!setValue) return false; // check for Boolean(isComplete)
+    } else if (String(setValue) !== String(filterValue)) {
+      return false; // check for id==='a-05'
+    }
+  }
+  return true;
+}
+
+export function applyFilters(filters, set) {
+  return filters.every(filter => applyFilter(filter, set));
+}
+
 /**
  * Takes a subset intersection query string and returns the resultant intersected subsets
  * @param {string} query
@@ -289,22 +320,6 @@ export function parseQuery(query = '') {
  * @returns {[ScoringSet]}
  */
 export function getSubsetsByQuery(query, subsetParent = undefined) {
-  function applyFilter(filter, set) {
-    for (const k in filter) {
-      const setValue = set[k];
-      const filterValue = filter[k];
-      if (typeof setValue === 'function') {
-        if (!setValue.call(set, filterValue)) return false; // check for modelTypeGroup('question')
-        continue;
-      }
-      if (filterValue === undefined) {
-        if (!setValue) return false; // check for Boolean(isComplete)
-      } else if (String(setValue) !== String(filterValue)) {
-        return false; // check for id==='a-05'
-      }
-    }
-    return true;
-  }
   const allSubsets = getSubsets(subsetParent);
   const parsedQueryMatrix = parseQuery(query);
   const subsetQueryMatrix = parsedQueryMatrix.map(row => {
@@ -323,17 +338,11 @@ export function getSubsetsByQuery(query, subsetParent = undefined) {
       .flat();
   });
   const intersectionQueryLists = matrixMultiply(subsetQueryMatrix);
+  let columnInclusionFilters = parsedQueryMatrix.map(row => row.lastItem);
+  if (subsetParent) columnInclusionFilters = [[]].concat(columnInclusionFilters);
   const intersectedSubsets = intersectionQueryLists.map(intersectionQueryList => {
-    if (subsetParent) return createIntersectionSubset([subsetParent, ...intersectionQueryList]);
-    return createIntersectionSubset(intersectionQueryList);
-  });
-  // TODO: might have to allow post filters on each row columns, such that [modelType=article](isComplete) test(isPassed) works
-  let postFilteredSubsets = intersectedSubsets;
-  parsedQueryMatrix.forEach(row => {
-    const inclusionFilters = row.lastItem;
-    inclusionFilters.forEach(inclusionFilter => {
-      postFilteredSubsets = postFilteredSubsets.filter(set => applyFilter(inclusionFilter, set));
-    });
-  });
-  return postFilteredSubsets;
+    if (subsetParent) return createIntersectionSubset([subsetParent, ...intersectionQueryList], columnInclusionFilters);
+    return createIntersectionSubset(intersectionQueryList, columnInclusionFilters);
+  }).filter(Boolean);
+  return intersectedSubsets;
 }
