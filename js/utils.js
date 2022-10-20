@@ -285,7 +285,18 @@ export function getSubsetsByQuery(query, subsetParent = undefined) {
           : getSubsetsByModelId(filter.modelId, subsetParent);
         if (hasModelIdFilter) delete filter.modelId;
         // Return only filtered sets
-        const attributeFilteredSubsets = _.where(filterSubsets, filter);
+        const attributeFilteredSubsets = filterSubsets.filter(set => {
+          for (const k in filter) {
+            const setValue = set[k];
+            const value = filter[k];
+            if (typeof setValue === 'function') {
+              if (!setValue.call(set, value)) return false;
+              continue;
+            }
+            if (setValue !== value) return false;
+          }
+          return true;
+        });
         return attributeFilteredSubsets;
       })
       .flat();

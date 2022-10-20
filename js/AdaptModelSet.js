@@ -22,6 +22,10 @@ export default class AdaptModelSet {
     return this._model.get('_component');
   }
 
+  modelTypeGroup(group) {
+    return this._model.isTypeGroup(group);
+  }
+
   get models() {
     return this._models;
   }

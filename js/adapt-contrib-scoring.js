@@ -47,18 +47,27 @@ class Scoring extends Backbone.Controller {
      */
     this._rawSets = [];
     this.listenTo(Adapt, 'adapt:start', this.onAdaptStart);
+    this.listenTo(data, {
+      add: this.addModel,
+      remove: this.removeModel
+    });
   }
 
   onAdaptStart() {
     // delay any listeners until all data has been restored
     this._setupListeners();
-    this.makeAdaptModelSets();
     this.init();
     this.update();
   }
 
-  makeAdaptModelSets() {
-    data.forEach(model => this.register(new AdaptModelSet({ model })));
+  addModel(model) {
+    this.register(new AdaptModelSet({ model }));
+  }
+
+  removeModel(model) {
+    const id = model.get('_id');
+    const setIndex = this._rawSets.findIndex(set => set.id === id);
+    this._rawSets.splice(setIndex, 1);
   }
 
   _setupListeners() {
