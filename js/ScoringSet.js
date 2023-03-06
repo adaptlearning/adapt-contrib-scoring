@@ -9,7 +9,9 @@ import scoring, {
   getSubsetsByModelId,
   getSubsetById,
   getSubSetByPath,
-  isAvailableInHierarchy
+  getSubsetsByQuery,
+  isAvailableInHierarchy,
+  AdaptModelSet
 } from './adapt-contrib-scoring';
 import Backbone from 'backbone';
 
@@ -28,7 +30,7 @@ import Backbone from 'backbone';
  * give a subset of retention-question-components.
  * Intersected sets will always only include models from their prospective set.
  */
-export default class ScoringSet extends Backbone.Controller {
+class ScoringSet extends Backbone.Controller {
 
   initialize({
     _id = null,
@@ -128,12 +130,20 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * @param {string} query
+   * @returns {[ScoringSet]}
+   */
+  getSubsetsByQuery(query) {
+    return getSubsetsByQuery(query, this);
+  }
+
+  /**
    * Returns subsets populated by child models
    * @param {ScoringSet} set
    * @returns {[ScoringSet]}
    */
   getPopulatedSubset(subset) {
-    return subset.filter(set => set.models.length > 0);
+    return subset.filter(set => set.isPopulated);
   }
 
   /**
@@ -141,6 +151,16 @@ export default class ScoringSet extends Backbone.Controller {
    */
   get subsetParent() {
     return this._subsetParent;
+  }
+
+  get subsetPath() {
+    let subject = this;
+    const path = [];
+    while (subject) {
+      path.push(subject);
+      subject = subject.subsetParent;
+    }
+    return path.reverse();
   }
 
   get id() {
@@ -174,6 +194,18 @@ export default class ScoringSet extends Backbone.Controller {
    */
   get models() {
     Logging.error(`models must be overriden for ${this.constructor.name}`);
+  }
+
+  /**
+   * Check to see if there are any child models
+   * @returns {boolean}
+   */
+  get isPopulated() {
+    return Boolean(this.models?.length);
+  }
+
+  get isNotPopulated() {
+    return (this.isPopulated === false);
   }
 
   /**
@@ -216,7 +248,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get minScore() {
-    Logging.error(`minScore must be overriden for ${this.constructor.name}`);
+    return this.questions.reduce((score, set) => score + set.minScore, 0);
   }
 
   /**
@@ -224,7 +256,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get maxScore() {
-    Logging.error(`maxScore must be overriden for ${this.constructor.name}`);
+    return this.questions.reduce((score, set) => score + set.maxScore, 0);
   }
 
   /**
@@ -232,7 +264,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get score() {
-    Logging.error(`score must be overriden for ${this.constructor.name}`);
+    return this.questions.reduce((score, set) => score + set.score, 0);
   }
 
   /**
@@ -254,11 +286,31 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Returns the number of correctly answered questions
+   * @returns {number}
+   */
+  get correctness() {
+    return this.questions.reduce((count, model) => count + (model.get('_isCorrect') ? 1 : 0), 0);
+  }
+
+  /**
+     * Returns the percentage of correctly answered questions
+     * @returns {number}
+     */
+  get scaledCorrectness() {
+    return getScaledScoreFromMinMax(this.correctness, 0, this.questions.length);
+  }
+
+  /**
    * Returns whether the set is completed
    * @returns {boolean}
    */
   get isComplete() {
     Logging.error(`isComplete must be overriden for ${this.constructor.name}`);
+  }
+
+  get isIncomplete() {
+    return (this.isComplete === false);
   }
 
   /**
@@ -267,6 +319,10 @@ export default class ScoringSet extends Backbone.Controller {
    */
   get isPassed() {
     Logging.error(`isPassed must be overriden for ${this.constructor.name}`);
+  }
+
+  get isFailed() {
+    return (this.isPassed === false);
   }
 
   /**
@@ -280,3 +336,7 @@ export default class ScoringSet extends Backbone.Controller {
   onPassed() {}
 
 }
+
+Object.setPrototypeOf(AdaptModelSet.prototype, ScoringSet.prototype);
+
+export default ScoringSet;

@@ -1,6 +1,7 @@
 import Backbone from 'backbone';
 import Adapt from 'core/js/adapt';
 import data from 'core/js/data';
+import './helpers';
 import {
   filterModels,
   filterIntersectingHierarchy,
@@ -12,9 +13,11 @@ import {
   getSubsetsByType,
   getSubsetsByModelId,
   getSubSetByPath,
+  getSubsetsByQuery,
   getScaledScoreFromMinMax,
   isAvailableInHierarchy
 } from './utils';
+import AdaptModelSet from './AdaptModelSet';
 
 export {
   filterModels,
@@ -27,8 +30,10 @@ export {
   getSubsetsByType,
   getSubsetsByModelId,
   getSubSetByPath,
+  getSubsetsByQuery,
   getScaledScoreFromMinMax,
-  isAvailableInHierarchy
+  isAvailableInHierarchy,
+  AdaptModelSet
 };
 
 /**
@@ -43,6 +48,10 @@ class Scoring extends Backbone.Controller {
      */
     this._rawSets = [];
     this.listenTo(Adapt, 'adapt:start', this.onAdaptStart);
+    this.listenTo(data, {
+      add: this.addModel,
+      remove: this.removeModel
+    });
   }
 
   onAdaptStart() {
@@ -50,6 +59,16 @@ class Scoring extends Backbone.Controller {
     this._setupListeners();
     this.init();
     this.update();
+  }
+
+  addModel(model) {
+    this.register(new AdaptModelSet({ model }));
+  }
+
+  removeModel(model) {
+    const id = model.get('_id');
+    const setIndex = this._rawSets.findIndex(set => set.id === id);
+    this._rawSets.splice(setIndex, 1);
   }
 
   _setupListeners() {
@@ -162,6 +181,15 @@ class Scoring extends Backbone.Controller {
    */
   getSubsetByPath(path) {
     return getSubSetByPath(path);
+  }
+
+  /**
+   * Returns sets or intersection sets by query
+   * @param {string} query
+   * @returns {ScoringSet}
+   */
+  getSubsetsByQuery(query) {
+    return getSubsetsByQuery(query);
   }
 
   /**
