@@ -79,5 +79,5 @@ For backward compatibility the following events are triggered if `"_isBackwardCo
 
 ----------------------------
 **Version number:** 0.0.1 (pre-release)<br>
-**Framework versions:** will require a framework update for tracking.js (add version following release)<br>
+**Framework versions:** Requires https://github.com/adaptlearning/adapt-contrib-core/pull/316 (update once released)<br>
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-scoring/graphs/contributors)
