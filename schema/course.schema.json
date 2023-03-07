@@ -1,0 +1,80 @@
+{
+  "$anchor": "scoring-course",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "$patch": {
+    "source": {
+      "$ref": "course"
+    },
+    "with": {
+      "properties": {
+        "_scoring": {
+          "type": "object",
+          "title": "Scoring",
+          "default": {},
+          "properties": {
+            "_id": {
+              "type": "string",
+              "title": "ID",
+              "description": "A human-readable ID for this object",
+              "default": ""
+            },
+            "title": {
+              "type": "string",
+              "title": "Title",
+              "description": "A title for this object. Not required, but exposed should it be used for reporting purposes",
+              "default": "",
+              "_adapt": {
+                "translatable": true
+              }
+            },
+            "_passmark": {
+              "type": "object",
+              "title": "Passmark",
+              "description": "The settings used to configure the passmark",
+              "default": {},
+              "properties": {
+                "_isEnabled": {
+                  "type": "boolean",
+                  "title": "Enable passmark",
+                  "description": "Determines whether a passmark is required",
+                  "default": true
+                },
+                "_requiresPassedSubsets": {
+                  "type": "boolean",
+                  "title": "Require passed subsets",
+                  "description": "Determines whether all `_isScoreIncluded` scoring sets need to be passed",
+                  "default": false
+                },
+                "_score": {
+                  "type": "number",
+                  "title": "Score",
+                  "description": "Determines the score required to pass",
+                  "default": 60
+                },
+                "_correctness": {
+                  "type": "number",
+                  "title": "Correctness",
+                  "description": "Determines the correctness (number of correctly answered questions) required to pass",
+                  "default": 60
+                },
+                "_isScaled": {
+                  "type": "boolean",
+                  "title": "Set passmark as percentage",
+                  "description": "Determines whether `_score` and `_correctness` are to be used as raw or percentage values",
+                  "default": true
+                }
+              }
+            }
+          },
+          "_isBackwardCompatible": {
+            "type": "boolean",
+            "title": "Enable backward compatibility",
+            "description": "Determines whether to use legacy assessment events and state for backward compatibility with other plugins",
+            "default": false
+          }
+        }
+      }
+    }
+  }
+}

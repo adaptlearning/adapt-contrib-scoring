@@ -1,7 +1,7 @@
 import Adapt from 'core/js/adapt';
 import Logging from 'core/js/logging';
 import OfflineStorage from 'core/js/offlineStorage';
-import scoring, {
+import {
   filterModels,
   getScaledScoreFromMinMax,
   getSubsets,
@@ -10,9 +10,8 @@ import scoring, {
   getSubsetById,
   getSubSetByPath,
   getSubsetsByQuery,
-  isAvailableInHierarchy,
-  AdaptModelSet
-} from './adapt-contrib-scoring';
+  isAvailableInHierarchy
+} from './utils';
 import Backbone from 'backbone';
 
 /**
@@ -30,15 +29,14 @@ import Backbone from 'backbone';
  * give a subset of retention-question-components.
  * Intersected sets will always only include models from their prospective set.
  */
-class ScoringSet extends Backbone.Controller {
+export default class ScoringSet extends Backbone.Controller {
 
   initialize({
     _id = null,
     _type = null,
     title = '',
     _isScoreIncluded = false,
-    _isCompletionRequired = false,
-    _isContainer = false
+    _isCompletionRequired = false
   } = {}, subsetParent = null) {
     this._subsetParent = subsetParent;
     this._id = _id;
@@ -46,14 +44,19 @@ class ScoringSet extends Backbone.Controller {
     this._title = title;
     this._isScoreIncluded = _isScoreIncluded;
     this._isCompletionRequired = _isCompletionRequired;
-    this._isContainer = _isContainer;
-    // Only register root sets as subsets are dynamically created when required
+    // only register root sets as subsets are dynamically created when required
     if (!this._subsetParent) this.register();
     this._setupListeners();
   }
 
+  /**
+   * Register the set
+   * @fires Adapt#scoring:[set.type]:register
+   * @fires Adapt#scoring:set:register
+   */
   register() {
-    scoring.register(this);
+    Adapt.scoring.register(this);
+    Adapt.trigger(`scoring:${this.type}:register scoring:set:register`, this);
   }
 
   /**
@@ -85,13 +88,17 @@ class ScoringSet extends Backbone.Controller {
     if (isPassed && !this._wasPassed) this.onPassed();
     this._wasComplete = isComplete;
     this._wasPassed = isPassed;
-    Adapt.trigger('scoring:set:update', this);
   }
+
+  /**
+   * Reset the set
+   */
+  reset() {}
 
   /**
    * Filter modules by intersection
    * @param {Backbone.Model} models
-   * @returns {Array<Backbone.Model>}
+   * @returns {[Backbone.Model]}
    */
   filterModels(models) {
     return filterModels(this, models);
@@ -269,7 +276,6 @@ class ScoringSet extends Backbone.Controller {
 
   /**
    * Returns a percentage score relative to a positive minimum or zero and maximum values
-   * A negative percentage correct is not possible with this function
    * @returns {number}
    */
   get scaledScore() {
@@ -287,6 +293,7 @@ class ScoringSet extends Backbone.Controller {
 
   /**
    * Returns the number of correctly answered questions
+   * @note Assumes the same number of questions are used in each attempt
    * @returns {number}
    */
   get correctness() {
@@ -294,11 +301,19 @@ class ScoringSet extends Backbone.Controller {
   }
 
   /**
-     * Returns the percentage of correctly answered questions
-     * @returns {number}
-     */
+   * Returns the percentage of correctly answered questions
+   * @returns {number}
+   */
   get scaledCorrectness() {
     return getScaledScoreFromMinMax(this.correctness, 0, this.questions.length);
+  }
+
+  /**
+   * Returns whether the set can be reset
+   * @returns {boolean}
+   */
+  get canReset() {
+    return false
   }
 
   /**
@@ -326,17 +341,21 @@ class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * Override this function to perform set specific completion tasks
+   * @fires Adapt#scoring:[set.type]:complete
+   * @fires Adapt#scoring:set:complete
    */
-  onCompleted() {}
+  onCompleted() {
+    Adapt.trigger(`scoring:${this.type}:complete scoring:set:complete`, this);
+    Logging.debug(`${this.id} completed`);
+  }
 
   /**
-   * Override this function to perform specific passing tasks
+   * @fires Adapt#scoring:[set.type]:passed
+   * @fires Adapt#scoring:set:passed
    */
-  onPassed() {}
+  onPassed() {
+    Adapt.trigger(`scoring:${this.type}:passed scoring:set:passed`, this);
+    Logging.debug(`${this.id} passed`);
+  }
 
 }
-
-Object.setPrototypeOf(AdaptModelSet.prototype, ScoringSet.prototype);
-
-export default ScoringSet;

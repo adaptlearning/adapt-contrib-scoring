@@ -1,0 +1,13 @@
+// course.json
+"_scoring": {
+  "_id": "",
+  "title": "Total score",
+  "_passmark": {
+    "_isEnabled": true,
+    "_requiresPassedSubsets": false,
+    "_score": 75,
+    "_correctness": 75,
+    "_isScaled": true
+  },
+  "_isBackwardCompatible": false
+}

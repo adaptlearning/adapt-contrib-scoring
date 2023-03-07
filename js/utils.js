@@ -1,5 +1,5 @@
 import Adapt from 'core/js/adapt';
-import data from 'core/js/data';
+import Data from 'core/js/data';
 
 /** @typedef {import("./ScoringSet").default} ScoringSet */
 
@@ -60,7 +60,7 @@ export function hasIntersectingHierarchy(listA, listB) {
 }
 
 /**
- * Returns a subset from the given sets, reduces from left to right, returning the class of the furthest right most set
+ * Returns a subset from the given sets, reduces from left to right, returning the class of the furthest right most set.
  * This effectively makes a pipe of parent-child related sets which use each parent in turn to reduce the models in the next subset
  * @param {[ScoringSet]} sets
  * @returns {ScoringSet}
@@ -131,7 +131,7 @@ export function getSubsetsByType(type, subsetParent = undefined) {
  * @returns {[ScoringSet]}
  */
 export function getSubsetsByModelId(id, subsetParent = undefined) {
-  const models = [data.findById(id)];
+  const models = [Data.findById(id)];
   let sets = getRawSets(subsetParent).filter(set => hasIntersectingHierarchy(set.models, models));
   if (subsetParent) {
     // Create intersection sets between the found sets and the subsetParent
@@ -178,19 +178,16 @@ export function getSubSetByPath(path, subsetParent = undefined) {
 }
 
 /**
- * Returns the percentage position of score between a positive minScore or zero and maxScore
- * A negative percentage correct is not possible with this function
+ * Returns the percentage position (between -100-100) of score between minScore and maxScore
  * @param {number} score
  * @param {number} minScore
  * @param {number} maxScore
  * @returns {number}
  */
 export function getScaledScoreFromMinMax(score, minScore, maxScore) {
-  // Ensure minScore cannot be less than zero as negtive percentage correct makes no sense
-  if (minScore < 0) minScore = 0;
-  const range = maxScore - minScore;
-  const relativeScore = score - minScore;
-  return Math.round((relativeScore / range) * 100);
+  // range split into negative/positive ranges (rather than min-max normalization) depending on score
+  const range = (score < 0) ? Math.abs(minScore) : maxScore;
+  return Math.round((score / range) * 100);
 }
 
 /**
@@ -206,11 +203,11 @@ export function isAvailableInHierarchy(model) {
  * @param {[[any]]} matrix
  * @returns {[any]}
  */
-export function matrixMultiply (matrix) {
+export function matrixMultiply(matrix) {
   if (matrix.length === 0) return [];
   const partLengths = matrix.map(part => part.length); // how large each row is
   if (partLengths.some(length => length === 0)) return []; // cannot multiply an empty row
-  const subPartIndices = '0'.repeat(matrix.length).split('').map(Number); // how far we've gone in each row
+  const subPartIndices = new Array(matrix.length).fill(0) // how far we've gone in each row
   let isEnded = false;
   const sumsToPerform = [];
   while (isEnded === false) {
@@ -256,30 +253,19 @@ export function parseQuery(query = '') {
       });
     }
     if (attributeQueryParts) {
-      const multiplyAttributeParts = attributeQueryParts.filter(part => part[0] === '[').map(attributeQueryPart => {
-        const attributeQueryPartMiddle = attributeQueryPart.slice(1, -1);
-        const attributeQueryPartSections = attributeQueryPartMiddle.split(',').map(section => section.trim()).filter(Boolean);
-        const attributeFilterPart = attributeQueryPartSections.map(section => {
-          if (section[0] === '#') {
-            return { id: section.slice(1) };
-          }
-          const [name, value] = section.split('=').map(section => section.trim()).filter(Boolean);
-          return { [name]: value };
+      const getAttributeParts = (attributeQueryParts, character) => {
+        return attributeQueryParts.filter(part => part[0] === character).map(attributeQueryPart => {
+          const attributeQueryPartMiddle = attributeQueryPart.slice(1, -1);
+          const attributeQueryPartSections = attributeQueryPartMiddle.split(',').map(section => section.trim()).filter(Boolean);
+          return attributeQueryPartSections.map(section => {
+            if (section[0] === '#') return { id: section.slice(1) };
+            const [name, value] = section.split('=').map(section => section.trim()).filter(Boolean);
+            return { [name]: value };
+          });
         });
-        return attributeFilterPart;
-      });
-      const filterAttributeParts = attributeQueryParts.filter(part => part[0] === '(').map(attributeQueryPart => {
-        const attributeQueryPartMiddle = attributeQueryPart.slice(1, -1);
-        const attributeQueryPartSections = attributeQueryPartMiddle.split(',').map(section => section.trim()).filter(Boolean);
-        const attributeFilterPart = attributeQueryPartSections.map(section => {
-          if (section[0] === '#') {
-            return { id: section.slice(1) };
-          }
-          const [name, value] = section.split('=').map(section => section.trim()).filter(Boolean);
-          return { [name]: value };
-        });
-        return attributeFilterPart;
-      });
+      };
+      const multiplyAttributeParts = getAttributeParts(attributeQueryParts, '[');
+      const filterAttributeParts = getAttributeParts(attributeQueryParts, '(');
       const flattenedFilterAttributeObjects = filterAttributeParts.map(part => Object.assign({}, ...part));
       const multipliedAttributeParts = matrixMultiply([majorFilterPart, ...multiplyAttributeParts].filter(item => item?.length));
       const flattenedMultiplyObjects = multipliedAttributeParts.map(query => Object.assign({}, ...query));

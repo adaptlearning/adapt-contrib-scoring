@@ -1,12 +1,12 @@
 {
   "name": "adapt-contrib-scoring",
-  "version": "1.0.1",
+  "version": "0.0.1",
   "framework": ">=5.20",
-  "homepage": "https://github.com/cgkineo/adapt-contrib-scoring",
-  "issues": "https://github.com/cgkineo/adapt-contrib-scoring/issues/new",
-  "extension": "scoring",
-  "displayName": "Scoring",
-  "description": "An extension which attaches to an article object to group various question components and provide a score with feedback",
+  "homepage": "https://github.com/adaptlearning/adapt-contrib-scoring",
+  "issues": "https://github.com/adaptlearning/adapt-contrib-scoring/issues/new",
+  "extension" : "scoring",
+  "displayName" : "Scoring",
+  "description": "An extension to expose an API for a collection of scoring sets used throughout the content",
   "main": "/js/adapt-contrib-scoring.js",
   "keywords": [
     "adapt-plugin",

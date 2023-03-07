@@ -1,42 +1,70 @@
-import data from 'core/js/data';
+import ScoringSet from './ScoringSet';
 
-export default class AdaptModelSet {
-  constructor({
-    _id,
-    model = null
-  }, subsetParent) {
-    model = model ?? data.findById(_id);
-    const id = _id ?? model.get('_id');
-    this._id = id;
-    this._type = 'adapt';
-    this._model = model;
-    this._models = [model];
-    this._subsetParent = subsetParent;
+export default class AdaptModelSet extends ScoringSet {
+
+  initialize(options = {}, subsetParent = null) {
+    this._model = options.model;
+    super.initialize({
+      ...options,
+      _id: this.model.get('_id'),
+      _type: 'adapt',
+      title: this.model.get('title')
+    }, subsetParent);
+  }
+
+  /**
+   * Intentionally empty to prevent super Class event triggers
+   * @override
+   */
+  update() {}
+
+  modelTypeGroup(group) {
+    return this.model.isTypeGroup(group);
   }
 
   get modelType() {
-    return this._model.get('_type');
+    return this.model.get('_type');
   }
 
   get modelComponent() {
-    return this._model.get('_component');
+    return this.model.get('_component');
   }
 
-  modelTypeGroup(group) {
-    return this._model.isTypeGroup(group);
+  get model() {
+    return this._model;
   }
 
+  /**
+   * @override
+   */
   get models() {
-    return this._models;
+    return [this.model];
   }
 
+  /**
+   * @override
+   */
   get isComplete() {
     return this._model.get('_isComplete');
   }
 
+  /**
+   * @override
+   */
   get isPassed() {
     return null;
   }
+
+  /**
+   * Intentionally empty to prevent super Class event triggers
+   * @override
+   */
+  onCompleted() {}
+
+  /**
+   * Intentionally empty to prevent super Class event triggers
+   * @override
+   */
+  onPassed() {}
 }
 
-// Is extended by ScoringSet later
