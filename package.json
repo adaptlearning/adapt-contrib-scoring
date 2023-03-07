@@ -1,11 +1,11 @@
 {
   "name": "adapt-contrib-scoring",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "framework": ">=5.20",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-scoring",
   "issues": "https://github.com/adaptlearning/adapt-contrib-scoring/issues/new",
-  "extension" : "scoring",
-  "displayName" : "Scoring",
+  "extension": "scoring",
+  "displayName": "Scoring",
   "description": "An extension to expose an API for a collection of scoring sets used throughout the content",
   "main": "/js/adapt-contrib-scoring.js",
   "keywords": [
