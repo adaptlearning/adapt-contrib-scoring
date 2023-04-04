@@ -183,7 +183,7 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   get isScoreIncluded() {
-    return this._isScoreIncluded;
+    return !this.isOptional && this.isAvailable && this._isScoreIncluded;
   }
 
   /**
@@ -191,7 +191,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get isCompletionRequired() {
-    return this._isCompletionRequired;
+    return !this.isOptional && this.isAvailable && this._isCompletionRequired;
   }
 
   /**
@@ -213,6 +213,30 @@ export default class ScoringSet extends Backbone.Controller {
 
   get isNotPopulated() {
     return (this.isPopulated === false);
+  }
+
+  /**
+   * Returns all component models regardless of `_isAvailable`
+   * @returns {[ComponentModel]}
+   */
+  get rawComponents() {
+    return this.model.findDescendantModels('component');
+  }
+
+  /**
+   * Returns all question models regardless of `_isAvailable`
+   * @returns {[QuestionModel]}
+   */
+  get rawQuestions() {
+    return this.model.findDescendantModels('question');
+  }
+
+  /**
+   * Returns all presentation component models regardless of `_isAvailable`
+   * @returns {[QuestionModel]}
+   */
+  get rawPresentationComponents() {
+    return this.rawComponents.filter(model => !model.isTypeGroup('question'));
   }
 
   /**
@@ -314,6 +338,22 @@ export default class ScoringSet extends Backbone.Controller {
    */
   get canReset() {
     return false
+  }
+
+  /**
+   * Returns whether the set is optional
+   * @returns {boolean}
+   */
+  get isOptional() {
+    return false
+  }
+
+  /**
+   * Returns whether the set is available
+   * @returns {boolean}
+   */
+  get isAvailable() {
+    return true
   }
 
   /**

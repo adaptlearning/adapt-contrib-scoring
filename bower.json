@@ -1,7 +1,7 @@
 {
   "name": "adapt-contrib-scoring",
-  "version": "0.0.1",
-  "framework": ">=5.20",
+  "version": "1.0.0",
+  "framework": ">=5.28.7",
   "homepage": "https://github.com/adaptlearning/adapt-contrib-scoring",
   "issues": "https://github.com/adaptlearning/adapt-contrib-scoring/issues/new",
   "extension": "scoring",

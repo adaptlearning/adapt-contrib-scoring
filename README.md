@@ -38,7 +38,7 @@ The API is exposed on the `Adapt` object to aid browser console use, but more ty
   import Scoring from 'extensions/adapt-contrib-scoring/js/adapt-contrib-scoring';
 ```
 
-In addition to retrieving all registered sets and their properties, the API can be used to query and filter sets via utility methods. Please see the JSDoc comments for details regarding these methods. Whilst each set is only self-aware, an intersection of scoring sets can be retrieved and evaluated by summing each set for a specified attribute. The most powerful of the utility methods is `getSubsetsByQuery`, which returns intersecting sets according to the query attributes - see https://github.com/cgkineo/adapt-contrib-scoring/pull/3 for details regarding query syntax.
+In addition to retrieving all registered sets and their properties, the API can be used to query and filter sets via utility methods. Please see the JSDoc comments for details regarding these methods. Whilst each set is only self-aware, an intersection of scoring sets can be retrieved and evaluated by summing each set for a specified attribute. The most powerful of the utility methods is `getSubsetsByQuery`, which returns intersecting sets according to the query attributes - see https://github.com/adaptlearning/adapt-contrib-scoring/pull/3 for details regarding query syntax.
 
 ## Attributes
 
@@ -78,6 +78,6 @@ For backward compatibility the following events are triggered if `"_isBackwardCo
 **Adapt#assessment:complete**
 
 ----------------------------
-**Version number:** 0.0.1 (pre-release)<br>
-**Framework versions:** Requires https://github.com/adaptlearning/adapt-contrib-core/pull/316 (update once released)<br>
+**Version number:** 1.0.0<br>
+**Framework versions:** >=5.28.7<br>
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-scoring/graphs/contributors)

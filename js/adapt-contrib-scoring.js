@@ -303,7 +303,7 @@ class Scoring extends Backbone.Controller {
    * @returns {boolean}
    */
   get isComplete() {
-    return this.completionSets.every(set => set.isOptional || set.isComplete);
+    return this.completionSets.every(set => set.isComplete);
   }
 
   /**
@@ -315,7 +315,7 @@ class Scoring extends Backbone.Controller {
   get isPassed() {
     //if (!this.isComplete) return false; // must be completed for a pass
     //if (!this.passmark.isEnabled && this.isComplete) return true; // always pass if complete and passmark is disabled
-    const isEverySubsetPassed = this.scoringSets.every(set => set.isOptional || set.isPassed)
+    const isEverySubsetPassed = this.scoringSets.every(set => set.isPassed)
     const isScaled = this.passmark.isScaled;
     const score = (isScaled) ? this.scaledScore : this.score;
     const correctness = (isScaled) ? this.scaledCorrectness : this.correctness;
@@ -335,7 +335,7 @@ class Scoring extends Backbone.Controller {
   /**
    * @private
    */
-  _setupBackwardCompatility() {
+  _setupBackwardCompatibility() {
     Adapt.assessment = {
       get: id => this.getSubsetById(id)?.model,
       getState: () => this._compatibilityState
@@ -377,11 +377,11 @@ class Scoring extends Backbone.Controller {
    */
   onAppDataReady() {
     this._config = Adapt.course.get('_scoring');
-    this._id = this._config._id;
-    this._title = this._config.title;
+    this._id = this._config?._id;
+    this._title = this._config?.title;
     this._passmark = new Passmark(this._config?._passmark);
-    this._isBackwardCompatible = this._config._isBackwardCompatible ?? false;
-    if (this.isBackwardCompatible) this._setupBackwardCompatility();
+    this._isBackwardCompatible = this._config?._isBackwardCompatible ?? false;
+    if (this.isBackwardCompatible) this._setupBackwardCompatibility();
   }
 
   /**
