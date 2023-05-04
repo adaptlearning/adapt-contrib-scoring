@@ -251,6 +251,14 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Returns all trackable components - excludes trickle etc.
+   * @returns {[ComponentModel]}
+   */
+  get trackableComponents() {
+    return this.components.filter(model => model.get('_isTrackable') !== false);
+  }
+
+  /**
    * Returns all `_isAvailable` question models
    * @returns {[QuestionModel]}
    */
