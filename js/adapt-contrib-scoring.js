@@ -34,8 +34,8 @@ export {
 class Scoring extends Backbone.Controller {
 
   initialize() {
-    this._rawSets = [];
     this.listenTo(Data, {
+      'loading': this.onDataLoading,
       add: this._addAdaptModelSet,
       remove: this._removeAdaptModelSet
     });
@@ -365,11 +365,30 @@ class Scoring extends Backbone.Controller {
   _setupListeners() {
     this._debouncedUpdate = _.debounce(this.update, 50);
     this._queuedChanges = [];
-    const updateQueue = model => {
-      this._queuedChanges.push(model);
-      this._debouncedUpdate();
-    };
-    this.listenTo(Data, 'change:_isAvailable change:_isInteractionComplete', updateQueue);
+    this.listenTo(Data, 'change:_isAvailable change:_isInteractionComplete', this._updateQueue);
+  }
+
+  /**
+   * @private
+   */
+  _removeListeners() {
+    this.stopListening(Data, 'change:_isAvailable change:_isInteractionComplete', this._updateQueue);
+  }
+
+  /**
+   * @private
+   */
+  _updateQueue(model) {
+    this._queuedChanges.push(model);
+    this._debouncedUpdate();
+  }
+
+  /**
+   * @listens Data#loading
+   */
+  onDataLoading() {
+    this._removeListeners();
+    this._rawSets = [];
   }
 
   /**
