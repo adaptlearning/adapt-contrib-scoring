@@ -26,10 +26,14 @@ The following events are triggered for each scoring set:
 
 **Adapt#scoring:[set.type]:register**<br>
 **Adapt#scoring:set:register**<br>
+**Adapt#scoring:[set.type]:restored**<br>
+**Adapt#scoring:set:restored**<br>
 **Adapt#scoring:[set.type]:complete**<br>
 **Adapt#scoring:set:complete**<br>
 **Adapt#scoring:[set.type]:passed**<br>
-**Adapt#scoring:set:passed**
+**Adapt#scoring:set:passed**<br>
+**Adapt#scoring:[set.type]:reset**<br>
+**Adapt#scoring:set:reset**
 
 ## Usage
 
