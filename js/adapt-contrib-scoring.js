@@ -35,7 +35,7 @@ class Scoring extends Backbone.Controller {
 
   initialize() {
     this.listenTo(Data, {
-      'loading': this.onDataLoading,
+      loading: this.onDataLoading,
       add: this._addAdaptModelSet,
       remove: this._removeAdaptModelSet
     });
