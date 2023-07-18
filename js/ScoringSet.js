@@ -70,8 +70,12 @@ export default class ScoringSet extends Backbone.Controller {
   /**
    * Restore data from previous sessions
    * @listens Adapt#offlineStorage:ready
+   * @fires Adapt#scoring:[set.type]:restored
+   * @fires Adapt#scoring:set:restored
    */
-  restore() {}
+  restore() {
+    Adapt.trigger(`scoring:${this.type}:restored scoring:set:restored`, this);
+  }
 
   init() {
     this._wasComplete = this.isComplete;
@@ -92,8 +96,13 @@ export default class ScoringSet extends Backbone.Controller {
 
   /**
    * Reset the set
+   * @fires Adapt#scoring:[set.type]:reset
+   * @fires Adapt#scoring:set:reset
    */
-  reset() {}
+  reset() {
+    Adapt.trigger(`scoring:${this.type}:reset scoring:set:reset`, this);
+    Logging.debug(`${this.id} reset`);
+  }
 
   /**
    * Filter modules by intersection
