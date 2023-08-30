@@ -82,6 +82,5 @@ For backward compatibility the following events are triggered if `"_isBackwardCo
 **Adapt#assessment:complete**
 
 ----------------------------
-**Version number:** 1.0.0<br>
 **Framework versions:** >=5.28.7<br>
 **Author / maintainer:** Adapt Core Team with [contributors](https://github.com/adaptlearning/adapt-contrib-scoring/graphs/contributors)
