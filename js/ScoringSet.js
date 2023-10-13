@@ -1,6 +1,7 @@
 import Adapt from 'core/js/adapt';
 import Logging from 'core/js/logging';
 import OfflineStorage from 'core/js/offlineStorage';
+import COMPLETION_STATE from 'core/js/enums/completionStateEnum';
 import {
   filterModels,
   getScaledScoreFromMinMax,
@@ -45,7 +46,7 @@ export default class ScoringSet extends Backbone.Controller {
     this._isScoreIncluded = _isScoreIncluded;
     this._isCompletionRequired = _isCompletionRequired;
     // only register root sets as subsets are dynamically created when required
-    if (!this._subsetParent) this.register();
+    if (!this.subsetParent) this.register();
     this._setupListeners();
   }
 
@@ -80,6 +81,7 @@ export default class ScoringSet extends Backbone.Controller {
   init() {
     this._wasComplete = this.isComplete;
     this._wasPassed = this.isPassed;
+    this._initializeObjective();
   }
 
   /**
@@ -102,6 +104,7 @@ export default class ScoringSet extends Backbone.Controller {
   reset() {
     Adapt.trigger(`scoring:${this.type}:reset scoring:set:reset`, this);
     Logging.debug(`${this.id} reset`);
+    this._resetObjective();
   }
 
   /**
@@ -398,12 +401,53 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Define the objective for reporting purposes
+   * @protected
+   */
+  _initializeObjective() {
+    if (this.subsetParent) return;
+    const id = this.id;
+    const description = this.title;
+    const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
+    OfflineStorage.set('objectiveDescription', id, description);
+    if (this.isComplete) return;
+    OfflineStorage.set('objectiveStatus', id, completionStatus);
+  }
+
+  /**
+   * Reset the objective data
+   * @protected
+   */
+  _resetObjective() {
+    if (this.subsetParent || this.isComplete) return;
+    const id = this.id;
+    const completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
+    OfflineStorage.set('objectiveScore', id, this.score, this.minScore, this.maxScore);
+    OfflineStorage.set('objectiveStatus', id, completionStatus);
+  }
+
+  /**
+   * Complete the objective
+   * @todo Always updates to latest data - is this desired?
+   * @protected
+   */
+  _completeObjective() {
+    if (this.subsetParent) return;
+    const id = this.id;
+    const completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
+    const successStatus = (this.isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
+    OfflineStorage.set('objectiveScore', id, this.score, this.minScore, this.maxScore);
+    OfflineStorage.set('objectiveStatus', id, completionStatus, successStatus);
+  }
+
+  /**
    * @fires Adapt#scoring:[set.type]:complete
    * @fires Adapt#scoring:set:complete
    */
   onCompleted() {
     Adapt.trigger(`scoring:${this.type}:complete scoring:set:complete`, this);
     Logging.debug(`${this.id} completed`);
+    this._completeObjective();
   }
 
   /**
