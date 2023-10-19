@@ -3,8 +3,8 @@ export default class Passmark {
   constructor({
     _isEnabled = true,
     _requiresPassedSubsets = false,
-    _score = 100,
-    _correctness = 100,
+    _score = 60,
+    _correctness = 60,
     _isScaled = true
   } = {}) {
     this._isEnabled = _isEnabled;

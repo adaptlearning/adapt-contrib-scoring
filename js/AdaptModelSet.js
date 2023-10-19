@@ -13,6 +13,24 @@ export default class AdaptModelSet extends ScoringSet {
   }
 
   /**
+   * Intentionally empty to override super Class
+   * @override
+   */
+  _initializeObjective() {}
+
+  /**
+   * Intentionally empty to override super Class
+   * @override
+   */
+  _resetObjective() {}
+
+  /**
+   * Intentionally empty to override super Class
+   * @override
+   */
+  _completeObjective() {}
+
+  /**
    * Intentionally empty to prevent super Class event triggers
    * @override
    */
