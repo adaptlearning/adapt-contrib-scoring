@@ -45,8 +45,9 @@ export default class ScoringSet extends Backbone.Controller {
     this._title = title;
     this._isScoreIncluded = _isScoreIncluded;
     this._isCompletionRequired = _isCompletionRequired;
-    // only register root sets as subsets are dynamically created when required
-    if (!this.subsetParent) this.register();
+    // exclude registration and restoration for dynamically created sets (via query intersections)
+    if (this.subsetParent) return;
+    this.register();
     this._setupListeners();
   }
 
