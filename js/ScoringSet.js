@@ -45,8 +45,6 @@ export default class ScoringSet extends Backbone.Controller {
     this._title = title;
     this._isScoreIncluded = _isScoreIncluded;
     this._isCompletionRequired = _isCompletionRequired;
-    // exclude registration and restoration for dynamically created sets (via query intersections)
-    if (this.subsetParent) return;
     this.register();
     this._setupListeners();
   }
@@ -57,6 +55,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:register
    */
   register() {
+    if (this.subsetParent) return;
     Adapt.scoring.register(this);
     Adapt.trigger(`scoring:${this.type}:register scoring:set:register`, this);
   }
@@ -65,6 +64,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @protected
    */
   _setupListeners() {
+    if (this.subsetParent) return;
     if (OfflineStorage.ready) return this.restore();
     this.listenTo(Adapt, 'offlineStorage:ready', this.restore);
   }
@@ -76,6 +76,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:restored
    */
   restore() {
+    if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:restored scoring:set:restored`, this);
   }
 
@@ -103,6 +104,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:reset
    */
   reset() {
+    if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:reset scoring:set:reset`, this);
     Logging.debug(`${this.id} reset`);
     this._resetObjective();
@@ -446,6 +448,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:complete
    */
   onCompleted() {
+    if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:complete scoring:set:complete`, this);
     Logging.debug(`${this.id} completed`);
     this._completeObjective();
@@ -456,6 +459,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:passed
    */
   onPassed() {
+    if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:passed scoring:set:passed`, this);
     Logging.debug(`${this.id} passed`);
   }
