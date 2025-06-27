@@ -86,7 +86,7 @@ class Scoring extends Backbone.Controller {
     const queuedChanges = [...new Set(this._queuedChanges)];
     const updateSubsets = !queuedChanges?.length
       ? this.subsets
-      : queuedChanges.reduce((subsets, model) => subsets.concat(getSubsetsByModelId(model?.get('_id'))), []);
+      : [...new Set(queuedChanges.reduce((subsets, model) => subsets.concat(getSubsetsByModelId(model?.get('_id'))), []))];
     updateSubsets.forEach(set => set.update());
     this._queuedChanges = [];
     if (!updateSubsets.length) return;
