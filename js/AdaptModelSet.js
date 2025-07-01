@@ -1,4 +1,7 @@
 import ScoringSet from './ScoringSet';
+import {
+  isAvailableInHierarchy
+} from './utils';
 
 export default class AdaptModelSet extends ScoringSet {
 
@@ -63,7 +66,7 @@ export default class AdaptModelSet extends ScoringSet {
    * @override
    */
   get isAvailable() {
-    return this.model.get('_isAvailable');
+    return isAvailableInHierarchy(this.model);
   }
 
   /**
