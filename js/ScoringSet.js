@@ -64,7 +64,8 @@ export default class ScoringSet extends Backbone.Controller {
    * @protected
    */
   _setupListeners() {
-    if (this.subsetParent) return;
+    if (this.subsetParent || this.type === 'adapt') return;
+    this.listenTo(Adapt, 'questionView:submitted', this.onQuestionSubmitted);
     if (OfflineStorage.ready) return this.restore();
     this.listenTo(Adapt, 'offlineStorage:ready', this.restore);
   }
@@ -81,6 +82,8 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   init() {
+    this._wasAvailable = this.isAvailable;
+    this._wasIncomplete = this.isIncomplete;
     this._wasComplete = this.isComplete;
     this._wasPassed = this.isPassed;
     this._initializeObjective();
@@ -91,9 +94,13 @@ export default class ScoringSet extends Backbone.Controller {
    */
   update() {
     const isComplete = this.isComplete;
-    if (isComplete && !this._wasComplete) this.onCompleted();
     const isPassed = this.isPassed;
+    if (isComplete && !this._wasComplete) this.onCompleted();
     if (isPassed && !this._wasPassed) this.onPassed();
+    // don't change the status of a currently completed objective - `isObjectiveComplete` should be controlled accordingly by each set
+    if (this.hasStatusChanged && !this.isObjectiveComplete) this._setObjectiveStatus();
+    this._wasAvailable = this.isAvailable;
+    this._wasIncomplete = this.isIncomplete;
     this._wasComplete = isComplete;
     this._wasPassed = isPassed;
   }
@@ -360,7 +367,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get canReset() {
-    return false
+    return false;
   }
 
   /**
@@ -368,7 +375,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get isOptional() {
-    return false
+    return false;
   }
 
   /**
@@ -376,7 +383,32 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get isAvailable() {
-    return true
+    return true;
+  }
+
+  /**
+   * Returns whether the set is started
+   * @returns {boolean}
+   */
+  get isStarted() {
+    return this.models.some(model => model.get('_isVisited'));
+  }
+
+  /**
+   * Returns whether the set is started and incomplete
+   * @returns {boolean}
+   */
+  get isIncomplete() {
+    return this.isStarted && !this.isComplete;
+  }
+
+  /**
+   * Returns whether the objective for the set is completed.
+   * Depending on the set logic, this can differ to `_isComplete`.
+   * @returns {boolean}
+   */
+  get isObjectiveComplete() {
+    return this.isComplete;
   }
 
   /**
@@ -385,10 +417,6 @@ export default class ScoringSet extends Backbone.Controller {
    */
   get isComplete() {
     Logging.error(`isComplete must be overriden for ${this.constructor.name}`);
-  }
-
-  get isIncomplete() {
-    return (this.isComplete === false);
   }
 
   /**
@@ -404,17 +432,24 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Check whether the status has changed since the last `update`
+   * @returns {boolean}
+   */
+  get hasStatusChanged() {
+    return this.isAvailable !== this._wasAvailable ||
+      this.isIncomplete !== this._wasIncomplete ||
+      this.isComplete !== this._wasComplete ||
+      this.isPassed !== this._wasPassed;
+  }
+
+  /**
    * Define the objective for reporting purposes
    * @protected
    */
   _initializeObjective() {
-    if (this.subsetParent) return;
-    const id = this.id;
-    const description = this.title;
-    const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
-    OfflineStorage.set('objectiveDescription', id, description);
-    if (this.isComplete) return;
-    OfflineStorage.set('objectiveStatus', id, completionStatus);
+    if (this.subsetParent || this.isStarted) return;
+    OfflineStorage.set('objectiveDescription', this.id, this.title);
+    this._setObjectiveStatus();
   }
 
   /**
@@ -422,25 +457,41 @@ export default class ScoringSet extends Backbone.Controller {
    * @protected
    */
   _resetObjective() {
-    if (this.subsetParent || this.isComplete) return;
-    const id = this.id;
-    const completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
-    OfflineStorage.set('objectiveScore', id, this.score, this.minScore, this.maxScore);
-    OfflineStorage.set('objectiveStatus', id, completionStatus);
+    if (this.subsetParent || this.isObjectiveComplete || !this.hasStatusChanged) return;
+    OfflineStorage.set('objectiveScore', this.id, this.score, this.minScore, this.maxScore);
+    this._setObjectiveStatus();
   }
 
   /**
-   * Complete the objective
-   * @todo Always updates to latest data - is this desired?
+   * Complete the objective.
+   * Will update to the latest data/attempt unless overriden in a subset.
    * @protected
    */
   _completeObjective() {
     if (this.subsetParent) return;
-    const id = this.id;
-    const completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
-    const successStatus = (this.isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
-    OfflineStorage.set('objectiveScore', id, this.score, this.minScore, this.maxScore);
-    OfflineStorage.set('objectiveStatus', id, completionStatus, successStatus);
+    OfflineStorage.set('objectiveScore', this.id, this.score, this.minScore, this.maxScore);
+    this._setObjectiveStatus();
+  }
+
+  /**
+   * Set the appropriate objective completion and success status
+   * Will update to the latest data/attempt, unless controlled accordingly in a subset.
+   * @protected
+   */
+  _setObjectiveStatus() {
+    if (this.subsetParent) return;
+    const isAvailable = this.isAvailable;
+    const isIncomplete = this.isIncomplete;
+    const isComplete = this.isComplete;
+    let completionStatus = COMPLETION_STATE.UNKNOWN.asLowerCase;
+    let successStatus = COMPLETION_STATE.UNKNOWN.asLowerCase;
+    if (isAvailable && !isIncomplete) completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
+    if (isAvailable && isIncomplete) completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
+    if (isAvailable && isComplete) {
+      completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
+      if (this.passmark.isEnabled) successStatus = (this.isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
+    }
+    OfflineStorage.set('objectiveStatus', this.id, completionStatus, successStatus);
   }
 
   /**
@@ -462,6 +513,16 @@ export default class ScoringSet extends Backbone.Controller {
     if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:passed scoring:set:passed`, this);
     Logging.debug(`${this.id} passed`);
+  }
+
+  /**
+   * @param {QuestionView} view
+   * @listens Adapt#questionView:submitted
+   */
+  onQuestionSubmitted(view) {
+    const model = view.model;
+    if (!this.questions.includes(model)) return;
+    model.addContextActivity(this.id, this.type, this.title);
   }
 
 }
