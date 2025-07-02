@@ -82,6 +82,7 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   init() {
+    this._setObjectiveStatus = _.debounce(this._setObjectiveStatus, 100);
     this._wasAvailable = this.isAvailable;
     this._wasIncomplete = this.isIncomplete;
     this._wasComplete = this.isComplete;
@@ -95,10 +96,9 @@ export default class ScoringSet extends Backbone.Controller {
   update() {
     const isComplete = this.isComplete;
     const isPassed = this.isPassed;
-    if (isComplete && !this._wasComplete) this.onCompleted();
-    if (isPassed && !this._wasPassed) this.onPassed();
-    // don't change the status of a currently completed objective - `isObjectiveComplete` should be controlled accordingly by each set
-    if (this.hasStatusChanged && !this.isObjectiveComplete) this._setObjectiveStatus();
+    if (isComplete && !this._wasComplete && this._wasAvailable) this.onCompleted();
+    if (isPassed && !this._wasPassed && this._wasAvailable) this.onPassed();
+    if (this.hasStatusChanged) this._setObjectiveStatus();
     this._wasAvailable = this.isAvailable;
     this._wasIncomplete = this.isIncomplete;
     this._wasComplete = isComplete;
@@ -420,6 +420,15 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Returns whether the objective for the set is passed.
+   * Depending on the set logic, this can differ to `isPassed`.
+   * @returns {boolean}
+   */
+  get isObjectivePassed() {
+    return this.isPassed;
+  }
+
+  /**
    * Returns whether the configured passmark has been achieved
    * @returns {boolean}
    */
@@ -458,7 +467,7 @@ export default class ScoringSet extends Backbone.Controller {
    */
   _resetObjective() {
     if (this.subsetParent || this.isObjectiveComplete || !this.hasStatusChanged) return;
-    OfflineStorage.set('objectiveScore', this.id, this.score, this.minScore, this.maxScore);
+    this._setObjectiveScore();
     this._setObjectiveStatus();
   }
 
@@ -469,12 +478,21 @@ export default class ScoringSet extends Backbone.Controller {
    */
   _completeObjective() {
     if (this.subsetParent) return;
-    OfflineStorage.set('objectiveScore', this.id, this.score, this.minScore, this.maxScore);
+    this._setObjectiveScore();
     this._setObjectiveStatus();
   }
 
   /**
-   * Set the appropriate objective completion and success status
+   * Set the objective score
+   * @protected
+   */
+  _setObjectiveScore() {
+    if (this.subsetParent) return;
+    OfflineStorage.set('objectiveScore', this.id, this.score, this.minScore, this.maxScore);
+  }
+
+  /**
+   * Set the appropriate objective completion and success status.
    * Will update to the latest data/attempt, unless controlled accordingly in a subset.
    * @protected
    */
@@ -482,14 +500,15 @@ export default class ScoringSet extends Backbone.Controller {
     if (this.subsetParent) return;
     const isAvailable = this.isAvailable;
     const isIncomplete = this.isIncomplete;
-    const isComplete = this.isComplete;
+    const isComplete = this.isObjectiveComplete;
+    const isPassed = this.isObjectivePassed;
     let completionStatus = COMPLETION_STATE.UNKNOWN.asLowerCase;
     let successStatus = COMPLETION_STATE.UNKNOWN.asLowerCase;
     if (isAvailable && !isIncomplete) completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
     if (isAvailable && isIncomplete) completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
     if (isAvailable && isComplete) {
       completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
-      if (this.passmark.isEnabled) successStatus = (this.isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
+      if (this.passmark.isEnabled) successStatus = (isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
     }
     OfflineStorage.set('objectiveStatus', this.id, completionStatus, successStatus);
   }
