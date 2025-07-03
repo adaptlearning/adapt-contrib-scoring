@@ -187,6 +187,7 @@ export function getSubSetByPath(path, subsetParent = undefined) {
 export function getScaledScoreFromMinMax(score, minScore, maxScore) {
   // range split into negative/positive ranges (rather than min-max normalization) depending on score
   const range = (score < 0) ? Math.abs(minScore) : maxScore;
+  if (!range) return 0;
   return Math.round((score / range) * 100);
 }
 
