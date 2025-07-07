@@ -14,6 +14,7 @@ import {
   isAvailableInHierarchy
 } from './utils';
 import Backbone from 'backbone';
+import _ from 'underscore';
 
 /**
  * The class provides an abstract that describes a set of models which can be extended with custom
@@ -45,6 +46,7 @@ export default class ScoringSet extends Backbone.Controller {
     this._title = title;
     this._isScoreIncluded = _isScoreIncluded;
     this._isCompletionRequired = _isCompletionRequired;
+    this._modifiers = [];
     // only register root sets as subsets are dynamically created when required
     if (!this.subsetParent) this.register();
     this._setupListeners();
@@ -86,14 +88,18 @@ export default class ScoringSet extends Backbone.Controller {
 
   /**
    * Executed on data changes
+   * @param {[Backbone.Model]} updatedModels
    */
-  update() {
+  update(updatedModels) {
     const isComplete = this.isComplete;
     if (isComplete && !this._wasComplete) this.onCompleted();
     const isPassed = this.isPassed;
     if (isPassed && !this._wasPassed) this.onPassed();
     this._wasComplete = isComplete;
     this._wasPassed = isPassed;
+    updatedModels.forEach(model => this._addModifiers(model));
+    this._logUpdate();
+    this._modifiers = [];
   }
 
   /**
@@ -163,6 +169,46 @@ export default class ScoringSet extends Backbone.Controller {
    */
   getPopulatedSubset(subset) {
     return subset.filter(set => set.isPopulated);
+  }
+
+  /**
+   * Returns the minimum score for the specified model
+   * @param {Backbone.Model} model
+   * @returns {number}
+   */
+  getMinScoreByModel(model) {
+    if (!this.rawQuestions.includes(model)) return 0;
+    return model.minScore;
+  }
+
+  /**
+   * Returns the maxiumum score for the specified model
+   * @param {Backbone.Model} model
+   * @returns {number}
+   */
+  getMaxScoreByModel(model) {
+    if (!this.rawQuestions.includes(model)) return 0;
+    return model.maxScore;
+  }
+
+  /**
+   * Returns the score for the specified model
+   * @param {Backbone.Model} model
+   * @returns {number}
+   */
+  getScoreByModel(model) {
+    if (!this.rawQuestions.includes(model)) return 0;
+    return model.score;
+  }
+
+  /**
+   * Returns a percentage score for the specified model - relative to a positive minimum or zero and maximum values
+   * @param {Backbone.Model} model
+   * @returns {number}
+   */
+  getScaledScoreByModel(model) {
+    if (!this.rawQuestions.includes(model)) return 0;
+    return getScaledScoreFromMinMax(this.getScoreByModel(model), this.getMinScoreByModel(model), this.getMaxScoreByModel(model));
   }
 
   /**
@@ -299,7 +345,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get minScore() {
-    return this.questions.reduce((score, set) => score + set.minScore, 0);
+    return this.questions.reduce((score, model) => score + this.getMinScoreByModel(model), 0);
   }
 
   /**
@@ -307,7 +353,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get maxScore() {
-    return this.questions.reduce((score, set) => score + set.maxScore, 0);
+    return this.questions.reduce((score, model) => score + this.getMaxScoreByModel(model), 0);
   }
 
   /**
@@ -315,7 +361,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get score() {
-    return this.questions.reduce((score, set) => score + set.score, 0);
+    return this.questions.reduce((score, model) => score + this.getScoreByModel(model), 0);
   }
 
   /**
@@ -361,6 +407,14 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Returns the list of modifiers which impacted the last update
+   * @returns {Array}
+   */
+  get modifiers() {
+    return this._modifiers;
+  }
+
+  /**
    * Returns whether the set is optional
    * @returns {boolean}
    */
@@ -398,6 +452,97 @@ export default class ScoringSet extends Backbone.Controller {
 
   get isFailed() {
     return (this.isPassed === false);
+  }
+
+  /**
+   * Returns the data to log
+   * @returns {object}
+   */
+  get logData() {
+    const data = {
+      id: this.id,
+      type: this.type,
+      minScore: this.minScore,
+      maxScore: this.maxScore,
+      score: this.score,
+      scaledScore: this.scaledScore,
+      isComplete: this.isComplete,
+      isPassed: this.isPassed
+    };
+    if (this.modifiers.length) data.modifiers = this.modifiers;
+    return data;
+  }
+
+  /**
+   * Return whether the logData has changed since the last update
+   * @returns {boolean}
+   */
+  get hasLogDataChanged() {
+    // delete previous modifiers entry before comparing logs for changes
+    const clonedLastLogData = structuredClone(this._lastLogData ?? {});
+    delete clonedLastLogData.modifiers;
+    return !(_.isEqual(clonedLastLogData, this.logData));
+  }
+
+  /**
+   * Add modifier details for how the set has been updated
+   * @protected
+   * @param {Backbone.Model} model
+   */
+  _addModifiers(model) {
+    if (!this.hasLogDataChanged) return;
+    const isAvailabilityChange = Object.hasOwn(model.changed, '_isAvailable');
+    if (isAvailabilityChange) {
+      this._addAvailabilityModifiers(model);
+      return;
+    }
+    this._addCompletionModifiers(model);
+  }
+
+  /**
+   * Add modifier details for how the set has been updated by availability changes
+   * @protected
+   * @param {Backbone.Model} model
+   */
+  _addAvailabilityModifiers(model) {
+    const questions = model.isTypeGroup('question')
+      ? [model]
+      : model.findDescendantModels('question');
+    questions.forEach(questionModel => {
+      const isAvailable = isAvailableInHierarchy(questionModel);
+      const minScore = this.getMinScoreByModel(questionModel);
+      const maxScore = this.getMaxScoreByModel(questionModel);
+      const data = {
+        modelId: questionModel.get('_id'),
+        minScore: isAvailable ? minScore : -minScore,
+        maxScore: isAvailable ? maxScore : -maxScore
+      };
+      if (questionModel.get('_isSubmitted')) data.score = -this.getScoreByModel(questionModel);
+      this.modifiers.push(data);
+    });
+  }
+
+  /**
+   * Add modifier details for how the set has been updated by completion changes
+   * @protected
+   * @param {Backbone.Model} model
+   */
+  _addCompletionModifiers(model) {
+    this.modifiers.push({
+      modelId: model.get('_id'),
+      score: this.getScoreByModel(model)
+    });
+  }
+
+  /**
+   * Log the data as JSON following an update
+   * @protected
+   */
+  _logUpdate() {
+    if (!this.hasLogDataChanged) return;
+    const logData = this.logData;
+    Logging.debug('scoring:update', JSON.stringify(logData));
+    this._lastLogData = logData;
   }
 
   /**
