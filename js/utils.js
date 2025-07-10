@@ -132,7 +132,7 @@ export function getSubsetsByType(type, subsetParent = undefined) {
  */
 export function getSubsetsByModelId(id, subsetParent = undefined) {
   const models = [Data.findById(id)];
-  let sets = getRawSets(subsetParent).filter(set => hasIntersectingHierarchy(set.models, models));
+  let sets = getRawSets(subsetParent).filter(set => hasIntersectingHierarchy(set.rawModels, models));
   if (subsetParent) {
     // Create intersection sets between the found sets and the subsetParent
     sets = sets.map(set => createIntersectionSubset([subsetParent, set]));
