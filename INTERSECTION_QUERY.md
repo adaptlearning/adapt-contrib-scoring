@@ -1,8 +1,8 @@
-# intersection query syntax
+# Intersection query syntax
 
 ## Preamble
 
-### query API
+### Query API
 ```js
 const queryString = "#a-300 #performance"
 Adapt.scoring.getSubsetsByQuery(queryString)
@@ -119,7 +119,7 @@ When multiplying the intersection parts `[modelType=article]` and `assessment`, 
 
 Anti-pattern walkthrough: In the above example, `[modelType=article] assessment`, if we had 20 articles and 2 assessments, we'd have 40 resultant intersected assessment sets. If each assessment belonged to only one article then we would have 38 useless intersections of articles intersecting assessment where there is no relation. As intersections reduce the number of models in the resultant set by only those models which intersect the multiplication used to product it, we could solve this problem by using `[modelType=article] assessment(isPopulated)`. Using an `(isPopulated)` filter would return only all of the article assessment intersections which have intersecting models. In this can it would probably be easier just to fetch the assessments directly using `assessment[modelType=article]`, rather than using an intersection.
 
-## Primary use-case: 
+## Primary use-case
 We have a performance metric that covers questions in the whole course and we have an assessment in one article that intersects some of the same questions. We want to know the sum of the performance score for just the assessment questions.
 
 To do this, assuming the AssessmentSet sits on article `a-300` and has the article blocks as its models and assuming a PerformanceSet, with id `performance` and a `score` property, sits on the course object and has all of the questions in the course as its models, the following example will satisfy our use-case:
