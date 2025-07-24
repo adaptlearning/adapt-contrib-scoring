@@ -75,7 +75,11 @@ observer.listenTo(Data, {
 });
 
 /**
- * Return true only if modelsA directly or indirectly intersect with the modelsB
+ * Return true only if any modelsA intersect with any modelsB
+ * Equal intersection is when the first and second model are equal
+ * Descendant intersection is when the first model is a descendant of the second
+ * Ancestor intersection is when the first model is a ancestor of the second
+ * Intersections identify models which have overlapping interests in the hierarchy
  * @param {Backbone.Model[]} modelsA
  * @param {Backbone.Model[]} modelsB
  * @returns {boolean}

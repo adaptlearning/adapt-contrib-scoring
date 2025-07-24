@@ -83,17 +83,17 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Create a clone of this instance, intersection over the intersectionParent
+   * Create a clone of this instance, intersected over the intersectionParent
    * This will reduce this.models by intersecting with the intersectionParent.models
    * @param {IntersectionSet} intersectionParent
    * @returns {IntersectionSet}
    */
   intersect(intersectionParent) {
-    // Create a clone of this instance, assign the clone an intersectionParent to
-    // Filter its models accordingly
-    const Class = Object.getPrototypeOf(this).constructor;
+    // Create a clone of this instance, assign the clone an intersectionParent by which to
+    // filter its models accordingly
     // Only the enumerable instance properties of this instance are passed through to the clone
     // i.e. _id, _type, _title, _model, _models not id, type, title, model, models
+    const Class = Object.getPrototypeOf(this).constructor;
     const options = { ...this, intersectionParent };
     return new Class(options);
   }
@@ -105,7 +105,7 @@ export default class IntersectionSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:register
    */
   register() {
-    // Only register root sets as subsets are dynamically created when required
+    // Only register root sets, intersection subsets are dynamically created when required
     if (this.isIntersectedSet) return;
     assignAutoId(this);
     Adapt.scoring.register(this);
@@ -278,6 +278,7 @@ export default class IntersectionSet extends Backbone.Controller {
 
   /**
    * The config or origin model id, used for querying
+   * query example: `[modelId=modelId]`
    * @returns {string}
    */
   get modelId() {

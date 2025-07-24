@@ -2,6 +2,12 @@
 
 ## Preamble
 
+### What is an intersection
+* Equal intersection is when the first and second model are equal
+* Descendant intersection is when the first model is a descendant of the second
+* Ancestor intersection is when the first model is a ancestor of the second
+* Intersections identify models which have overlapping interests in the hierarchy
+
 ### Query API
 ```js
 const queryString = "#a-300 #performance"

@@ -51,7 +51,6 @@ export default class Lifecycle extends Backbone.Controller {
     this.listenTo(model, 'reset', (...args) =>
       this.onAdaptModelReset(model, ...args)
     );
-    // this.listenTo(newSet, 'reset', this.onScoringSetReset);
   }
 
   /**
@@ -90,7 +89,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Listens to bubbled events Adapt events and begins the lifecycle of the registered sets
+   * Begins the lifecycle of the registered sets and listens to bubbled Adapt events
    * @listens Adapt#adapt:start
    * @listens Adapt.course#bubble:change:_isInteractionComplete
    * @listens Adapt.course#bubble:change:_isActive
@@ -104,7 +103,7 @@ export default class Lifecycle extends Backbone.Controller {
     await this.init();
     await this.onOfflineStorageReady();
     // only run update async so that restore, start and update
-    // are batch processed
+    // are batch processed together
     this.restore();
     this.start();
     await this.update(getAllSets());

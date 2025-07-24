@@ -10,7 +10,7 @@ export default class StateModels extends State {
 
   /**
    * Returns the saved models
-   * Note: Uses trackingPosition which can be disrupted by change the order or substance of sub tracking id elements,
+   * Note: Uses trackingPosition which can be disrupted by changes to the order or substance of sub tracking id elements,
    * such as changing the order of or the components in their block if the tracking id is on the blocks
    * @returns {AdaptModel[]}
    */
@@ -22,7 +22,7 @@ export default class StateModels extends State {
 
   /**
    * Saves the given models
-   * Note: Uses trackingPosition which can be disrupted by change the order or substance of sub tracking id elements,
+   * Note: Uses trackingPosition which can be disrupted by changes to the order or substance of sub tracking id elements,
    * such as changing the order of or the components in their block if the tracking id is on the blocks
    * @param {AdaptModel[]} models
    */

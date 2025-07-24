@@ -107,8 +107,8 @@ export class Scoring extends Backbone.Controller {
 
   /**
    * Register a configured root scoring set.
-   * This is usually performed automatically upon ScoringSet instantiation.
-   * @param {ScoringSet} newSet
+   * This is usually performed automatically upon IntersectionSet instantiation.
+   * @param {IntersectionSet} newSet
    * @fires Adapt#{set.type}:register
    * @fires Adapt#scoring:register
    */
@@ -122,7 +122,7 @@ export class Scoring extends Backbone.Controller {
 
   /**
    * Deregister a configured root scoring set
-   * @param {ScoringSet} oldSet
+   * @param {IntersectionSet} oldSet
    * @fires Adapt#{set.type}:deregister
    * @fires Adapt#scoring:deregister
    */

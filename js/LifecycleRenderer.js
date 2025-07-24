@@ -138,7 +138,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Resolves when the next batch has been rendereds
+   * Resolves when the next batch has been rendered
    */
   async onBatchRendered() {
     return new Promise(resolve => this.once('rendered', resolve));
