@@ -1,3 +1,6 @@
+/**
+ * Stores the configuration for passing
+ */
 export default class Passmark {
 
   constructor({

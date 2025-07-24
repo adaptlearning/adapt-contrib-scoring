@@ -6,7 +6,7 @@ An extension to expose an API for a collection of scoring sets used throughout t
 
 A scoring set consists of a collection of models from which scores (`minScore`, `maxScore`, `score`, `scaledScore`, `correctness`, `scaledCorrectness`), completion and passing statuses can be derived. Each set is only responsible for values derived from it's models, and has no perception of those from other scoring sets. A set may be a collection of content, such as an [assessment](https://github.com/adaptlearning/adapt-contrib-scoringAssessment); a collection of scores assigned directly to content; a collection of other scoring sets.
 
-Each plugin will register a new set type with the Scoring API, and identify its associations with other models, along with any extended functionality specific to that plugin. This will allow sets to be evaluated for any intersections within the course structure by comparing overlapping hierachies. Scoring sets allow multiple scores to be categorised as required, providing the ability to evaluate user performance across different areas.
+Each plugin will register a new set type with the Scoring API, and identify its associations with other models, along with any extended functionality specific to that plugin. This will allow sets to be evaluated for any intersections within the course structure by comparing overlapping hierarchies. Scoring sets allow multiple scores to be categorised as required, providing the ability to evaluate user performance across different areas.
 
 ### Attributes
 

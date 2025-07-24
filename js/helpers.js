@@ -1,14 +1,19 @@
 import Handlebars from 'handlebars';
 import {
   getSubsetsByQuery
-} from './utils';
+} from './utils/query';
+import {
+  sum
+} from './utils/math';
+
+// Global handlebars helpers
 
 const helpers = {
   scoreQuery(query, context) {
     const modelId = context?.data?.root?._id;
     query = query.replace('this', `#${modelId}`);
     const sets = getSubsetsByQuery(query);
-    return sets.reduce((score, set) => score + set.score, 0);
+    return sum(sets, 'score');
   }
 
   // score(context) {

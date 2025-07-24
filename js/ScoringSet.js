@@ -1,26 +1,20 @@
 import Adapt from 'core/js/adapt';
 import Logging from 'core/js/logging';
-import OfflineStorage from 'core/js/offlineStorage';
-import COMPLETION_STATE from 'core/js/enums/completionStateEnum';
+import LifecycleSet from './LifecycleSet';
 import {
-  filterModels,
-  getScaledScoreFromMinMax,
-  getSubsets,
-  getSubsetsByType,
-  getSubsetsByModelId,
-  getSubsetById,
-  getSubSetByPath,
-  getSubsetsByQuery,
-  isAvailableInHierarchy
-} from './utils';
-import Backbone from 'backbone';
+  getScaledScoreFromMinMax
+} from './utils/scoring';
+import {
+  sum
+} from './utils/math';
+import Objective from './Objective';
 
 /**
  * The class provides an abstract that describes a set of models which can be extended with custom
  * scoring and completion behaviour.
  * Derivative class instances should act as both a root set of models (test-blocks) and an
  * intersected set of models (retention-question-components vs test-blocks).
- * Set intersections are performed by comparing overlapping hierachies, such that a model will be
+ * Set intersections are performed by comparing overlapping hierarchies, such that a model will be
  * considered in both sets when it is equal to, a descendant of or an ancestor of a model in the intersecting
  * set. A test-block may contain a retention-question-component, a retention-question-component
  * may be contained in a test-block and a test-block may be equal to a test-block.
@@ -30,172 +24,53 @@ import Backbone from 'backbone';
  * give a subset of retention-question-components.
  * Intersected sets will always only include models from their prospective set.
  */
-export default class ScoringSet extends Backbone.Controller {
 
-  initialize({
-    _id = null,
-    _type = null,
-    title = '',
-    _isScoreIncluded = false,
-    _isCompletionRequired = false
-  } = {}, subsetParent = null) {
-    this._subsetParent = subsetParent;
-    this._id = _id;
-    this._type = _type;
-    this._title = title;
-    this._isScoreIncluded = _isScoreIncluded;
-    this._isCompletionRequired = _isCompletionRequired;
-    // only register root sets as subsets are dynamically created when required
-    if (!this.subsetParent) this.register();
-    this._setupListeners();
+/**
+ * Set at which intersections and queries can be performed.
+ * Set at which lifecycle phases, callbacks and triggers can be utilised.
+ * Set at which scoring, correctness and completion calculations can be performed.
+ */
+export default class ScoringSet extends LifecycleSet {
+
+  /**
+   * @param {Object} [options]
+   * @param {string} [options._id=null] Unique set id
+   * @param {string} [options._type=null] Type of set
+   * @param {string} [options._title=null] Set title
+   * @param {Backbone.Model} [options._model=null] Model of set configuration or orientation
+   * @param {Backbone.Model[]} [options._models=null] Models which belong to the set
+   * @param {string} [options.title=null] Human readable alternative for _title
+   * @param {Backbone.Model} [options.model=null] Human readable alternative for _model
+   * @param {Backbone.Model[]} [options.models=null] Human readable alternative for _models
+   * @param {IntersectionSet} [options.intersectionParent=null] System defined intersection parent
+   * @param {boolean} [options._isScoreIncluded=false]
+   * @param {boolean} [options._isCompletionRequired=false]
+   */
+  initialize(options = {}) {
+    super.initialize(options);
+    const {
+      _isScoreIncluded = false,
+      _isCompletionRequired = false
+    } = options;
+    this.isScoreIncluded = _isScoreIncluded;
+    this.isCompletionRequired = _isCompletionRequired;
+  }
+
+  /** @override */
+  get order() {
+    return 500;
   }
 
   /**
-   * Register the set
-   * @fires Adapt#scoring:[set.type]:register
-   * @fires Adapt#scoring:set:register
+   * Returns whether the set should be included in the total score
+   * @returns {boolean}
    */
-  register() {
-    Adapt.scoring.register(this);
-    Adapt.trigger(`scoring:${this.type}:register scoring:set:register`, this);
-  }
-
-  /**
-   * @protected
-   */
-  _setupListeners() {
-    if (OfflineStorage.ready) return this.restore();
-    this.listenTo(Adapt, 'offlineStorage:ready', this.restore);
-  }
-
-  /**
-   * Restore data from previous sessions
-   * @listens Adapt#offlineStorage:ready
-   * @fires Adapt#scoring:[set.type]:restored
-   * @fires Adapt#scoring:set:restored
-   */
-  restore() {
-    Adapt.trigger(`scoring:${this.type}:restored scoring:set:restored`, this);
-  }
-
-  init() {
-    this._wasComplete = this.isComplete;
-    this._wasPassed = this.isPassed;
-    this._initializeObjective();
-  }
-
-  /**
-   * Executed on data changes
-   */
-  update() {
-    const isComplete = this.isComplete;
-    if (isComplete && !this._wasComplete) this.onCompleted();
-    const isPassed = this.isPassed;
-    if (isPassed && !this._wasPassed) this.onPassed();
-    this._wasComplete = isComplete;
-    this._wasPassed = isPassed;
-  }
-
-  /**
-   * Reset the set
-   * @fires Adapt#scoring:[set.type]:reset
-   * @fires Adapt#scoring:set:reset
-   */
-  reset() {
-    Adapt.trigger(`scoring:${this.type}:reset scoring:set:reset`, this);
-    Logging.debug(`${this.id} reset`);
-    this._resetObjective();
-  }
-
-  /**
-   * Filter modules by intersection
-   * @param {Backbone.Model} models
-   * @returns {[Backbone.Model]}
-   */
-  filterModels(models) {
-    return filterModels(this, models);
-  }
-
-  /**
-   * @param {string} setId
-   * @returns {[ScoringSet]}
-   */
-  getSubsetById(setId) {
-    return getSubsetById(setId, this);
-  }
-
-  /**
-   * @param {string} setType
-   * @returns {[ScoringSet]}
-   */
-  getSubsetsByType(setType) {
-    return getSubsetsByType(setType, this);
-  }
-
-  /**
-   * @param {string} modelId
-   * @returns {[ScoringSet]}
-   */
-  getSubsetsByModelId(modelId) {
-    return getSubsetsByModelId(modelId, this);
-  }
-
-  /**
-   * @param {string|[string]} path
-   * @returns {[ScoringSet]}
-   */
-  getSubsetByPath(path) {
-    return getSubSetByPath(path, this);
-  }
-
-  /**
-   * @param {string} query
-   * @returns {[ScoringSet]}
-   */
-  getSubsetsByQuery(query) {
-    return getSubsetsByQuery(query, this);
-  }
-
-  /**
-   * Returns subsets populated by child models
-   * @param {ScoringSet} set
-   * @returns {[ScoringSet]}
-   */
-  getPopulatedSubset(subset) {
-    return subset.filter(set => set.isPopulated);
-  }
-
-  /**
-   * Returns the parent set if a dynamically created query set
-   */
-  get subsetParent() {
-    return this._subsetParent;
-  }
-
-  get subsetPath() {
-    let subject = this;
-    const path = [];
-    while (subject) {
-      path.push(subject);
-      subject = subject.subsetParent;
-    }
-    return path.reverse();
-  }
-
-  get id() {
-    return this._id;
-  }
-
-  get type() {
-    return this._type;
-  }
-
-  get title() {
-    return this._title;
-  }
-
   get isScoreIncluded() {
     return !this.isOptional && this.isAvailable && this._isScoreIncluded;
+  }
+
+  set isScoreIncluded(value) {
+    this._isScoreIncluded = value;
   }
 
   /**
@@ -206,92 +81,8 @@ export default class ScoringSet extends Backbone.Controller {
     return !this.isOptional && this.isAvailable && this._isCompletionRequired;
   }
 
-  /**
-   * Returns a unique array of models, filtered for `_isAvailable` and intersecting subsets hierarchies
-   * Always finish by calling `this.filterModels(models)`
-   * @returns {[Backbone.Model]}
-   */
-  get models() {
-    Logging.error(`models must be overriden for ${this.constructor.name}`);
-  }
-
-  /**
-   * Check to see if there are any child models
-   * @returns {boolean}
-   */
-  get isPopulated() {
-    return Boolean(this.models?.length);
-  }
-
-  get isNotPopulated() {
-    return (this.isPopulated === false);
-  }
-
-  /**
-   * Returns all component models regardless of `_isAvailable`
-   * @returns {[ComponentModel]}
-   */
-  get rawComponents() {
-    return this.model.findDescendantModels('component');
-  }
-
-  /**
-   * Returns all question models regardless of `_isAvailable`
-   * @returns {[QuestionModel]}
-   */
-  get rawQuestions() {
-    return this.model.findDescendantModels('question');
-  }
-
-  /**
-   * Returns all presentation component models regardless of `_isAvailable`
-   * @returns {[QuestionModel]}
-   */
-  get rawPresentationComponents() {
-    return this.rawComponents.filter(model => !model.isTypeGroup('question'));
-  }
-
-  /**
-   * Returns all `_isAvailable` component models
-   * @returns {[ComponentModel]}
-   */
-  get components() {
-    return this.models.reduce((components, model) => {
-      model.isTypeGroup('component') ? components.push(model) : components.push(...model.findDescendantModels('component'));
-      return components;
-    }, []).filter(isAvailableInHierarchy);
-  }
-
-  /**
-   * Returns all trackable components - excludes trickle etc.
-   * @returns {[ComponentModel]}
-   */
-  get trackableComponents() {
-    return this.components.filter(model => model.get('_isTrackable') !== false);
-  }
-
-  /**
-   * Returns all `_isAvailable` question models
-   * @returns {[QuestionModel]}
-   */
-  get questions() {
-    return this.components.filter(model => model.isTypeGroup('question'));
-  }
-
-  /**
-   * Returns all `_isAvailable` presentation component models
-   * @returns {[QuestionModel]}
-   */
-  get presentationComponents() {
-    return this.components.filter(model => !model.isTypeGroup('question'));
-  }
-
-  /**
-   * Returns all prospective subsets
-   * @returns {[ScoringSet]}
-   */
-  get subsets() {
-    return getSubsets(this);
+  set isCompletionRequired(value) {
+    this._isCompletionRequired = value;
   }
 
   /**
@@ -299,15 +90,15 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get minScore() {
-    return this.questions.reduce((score, set) => score + set.minScore, 0);
+    return sum(this.availableQuestions, 'minScore');
   }
 
   /**
-   * Returns the maxiumum score
+   * Returns the maximum score
    * @returns {number}
    */
   get maxScore() {
-    return this.questions.reduce((score, set) => score + set.maxScore, 0);
+    return sum(this.availableQuestions, 'maxScore');
   }
 
   /**
@@ -315,7 +106,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get score() {
-    return this.questions.reduce((score, set) => score + set.score, 0);
+    return sum(this.availableQuestions, 'score');
   }
 
   /**
@@ -330,18 +121,26 @@ export default class ScoringSet extends Backbone.Controller {
    * Returns a score as a string to include "+" operator for positive scores
    * @returns {string}
    */
-  get scoreAsstring() {
+  get scoreAsString() {
     const score = this.score;
     return (score > 0) ? `+${score.toString()}` : score.toString();
   }
 
   /**
-   * Returns the number of correctly answered questions
+   * Returns the number of correctly answered available questions
    * @note Assumes the same number of questions are used in each attempt
    * @returns {number}
    */
   get correctness() {
-    return this.questions.reduce((count, model) => count + (model.get('_isCorrect') ? 1 : 0), 0);
+    return sum(this.availableQuestions, model => (model.get('_isCorrect') ? 1 : 0));
+  }
+
+  /**
+   * Returns the number of available questions
+   * @returns {number}
+   */
+  get maxCorrectness() {
+    return this.availableQuestions.length;
   }
 
   /**
@@ -349,114 +148,108 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {number}
    */
   get scaledCorrectness() {
-    return getScaledScoreFromMinMax(this.correctness, 0, this.questions.length);
-  }
-
-  /**
-   * Returns whether the set can be reset
-   * @returns {boolean}
-   */
-  get canReset() {
-    return false
-  }
-
-  /**
-   * Returns whether the set is optional
-   * @returns {boolean}
-   */
-  get isOptional() {
-    return false
-  }
-
-  /**
-   * Returns whether the set is available
-   * @returns {boolean}
-   */
-  get isAvailable() {
-    return true
+    return getScaledScoreFromMinMax(this.correctness, 0, this.maxCorrectness);
   }
 
   /**
    * Returns whether the set is completed
+   * query example: `(isComplete)` or `(isComplete=false)`
    * @returns {boolean}
    */
   get isComplete() {
-    Logging.error(`isComplete must be overriden for ${this.constructor.name}`);
+    return this.model.get('_isComplete');
   }
 
+  /**
+   * Returns whether the set is incomplete
+   * query example: `(isIncomplete)` alias for `(isComplete=false)`
+   * @returns {boolean}
+   */
   get isIncomplete() {
     return (this.isComplete === false);
   }
 
   /**
    * Returns whether the configured passmark has been achieved
+   * query example: `(isPassed)`
    * @returns {boolean}
    */
   get isPassed() {
-    Logging.error(`isPassed must be overriden for ${this.constructor.name}`);
+    Logging.error(`isPassed must be overridden for ${this.constructor.name}`);
   }
 
+  /**
+   * Returns whether the configured passmark has been failed
+   * query example: `(isFailed)` alias for `(isComplete,isPassed=false)`
+   * @returns {boolean}
+   */
   get isFailed() {
-    return (this.isPassed === false);
+    return (this.isComplete && this.isPassed === false);
   }
 
   /**
-   * Define the objective for reporting purposes
-   * @protected
+   * The objective object for the set. See SCORM cmi.objectives
+   * @returns {Objective}
    */
-  _initializeObjective() {
-    if (this.subsetParent) return;
-    const id = this.id;
-    const description = this.title;
-    const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
-    OfflineStorage.set('objectiveDescription', id, description);
-    if (this.isComplete) return;
-    OfflineStorage.set('objectiveStatus', id, completionStatus);
+  get objective() {
+    if (this.isIntersectedSet) return;
+    return (this._objective = this._objective || new Objective({ set: this }));
+  }
+
+  /** @override */
+  async onInit() {
+    if (this.isIntersectedSet) return;
+    this.objective?.init();
+    super.onInit();
+  }
+
+  /** @override */
+  async onRestore() {
+    if (this.isIntersectedSet) return;
+    this._wasComplete = this.isComplete;
+    this._wasPassed = this.isPassed;
+    super.onRestore();
+  }
+
+  /** @override */
+  async onUpdate() {
+    if (this.isIntersectedSet) return;
+    const isComplete = this.isComplete;
+    if (isComplete && !this._wasComplete) this.onCompleted();
+    const isPassed = this.isPassed;
+    if (isPassed && !this._wasPassed) this.onPassed();
+    this._wasComplete = isComplete;
+    this._wasPassed = isPassed;
+    super.onUpdate();
   }
 
   /**
-   * Reset the objective data
-   * @protected
-   */
-  _resetObjective() {
-    if (this.subsetParent || this.isComplete) return;
-    const id = this.id;
-    const completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
-    OfflineStorage.set('objectiveScore', id, this.score, this.minScore, this.maxScore);
-    OfflineStorage.set('objectiveStatus', id, completionStatus);
-  }
-
-  /**
-   * Complete the objective
-   * @todo Always updates to latest data - is this desired?
-   * @protected
-   */
-  _completeObjective() {
-    if (this.subsetParent) return;
-    const id = this.id;
-    const completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
-    const successStatus = (this.isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
-    OfflineStorage.set('objectiveScore', id, this.score, this.minScore, this.maxScore);
-    OfflineStorage.set('objectiveStatus', id, completionStatus, successStatus);
-  }
-
-  /**
+   * Is executed on lifecycle update phase when isComplete=true
    * @fires Adapt#scoring:[set.type]:complete
    * @fires Adapt#scoring:set:complete
    */
-  onCompleted() {
+  async onCompleted() {
+    if (this.isIntersectedSet) return;
     Adapt.trigger(`scoring:${this.type}:complete scoring:set:complete`, this);
     Logging.debug(`${this.id} completed`);
-    this._completeObjective();
+    this.objective?.complete();
   }
 
   /**
+   * Is executed on lifecycle update phase when isPassed=true
    * @fires Adapt#scoring:[set.type]:passed
    * @fires Adapt#scoring:set:passed
    */
-  onPassed() {
+  async onPassed() {
+    if (this.isIntersectedSet) return;
     Adapt.trigger(`scoring:${this.type}:passed scoring:set:passed`, this);
     Logging.debug(`${this.id} passed`);
   }
 
+  /** @override */
+  async reset() {
+    if (this.isIntersectedSet) return;
+    super.reset();
+    this.objective?.reset();
+  }
 }
