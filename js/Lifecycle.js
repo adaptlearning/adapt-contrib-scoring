@@ -40,8 +40,8 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Creates a new AdaptModelSet when a new AdaptModel is added to the data API
-   * Listens to the reset events on the new model
+   * Creates a new AdaptModelSet when a new AdaptModel is added to the data API.
+   * Listens to the reset events on the new model.
    * @listens Data#add
    * @listens model#reset
    * @param {Backbone.Model} model
@@ -54,7 +54,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Removes the AdaptModelSet and stops listening when the model is removed from the data API
+   * Removes the AdaptModelSet and stops listening when the model is removed from the data API.
    * @listens Data#remove
    * @param {Backbone.Model} model
    */
@@ -68,7 +68,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Listens to a newly registered Set's reset and update events
+   * Listens to a newly registered Set's reset and update events.
    * @listens AdaptModelSet#reset
    * @listens AdaptModelSet#update
    * @param {InteractionSet} newSet
@@ -81,7 +81,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Stops listening to a deregistered set
+   * Stops listening to a deregistered set.
    * @param {IntersectionSet} oldSet
    */
   onScoringSetDeregister(oldSet) {
@@ -89,7 +89,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Begins the lifecycle of the registered sets and listens to bubbled Adapt events
+   * Begins the lifecycle of the registered sets and listens to bubbled Adapt events.
    * @listens Adapt#adapt:start
    * @listens Adapt.course#bubble:change:_isInteractionComplete
    * @listens Adapt.course#bubble:change:_isActive
@@ -112,7 +112,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Waits for offline storage to be ready
+   * Waits for offline storage to be ready.
    */
   async onOfflineStorageReady() {
     if (offlineStorage.ready) return;
@@ -120,7 +120,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Adds sets to the update phase which intersect the changed model
+   * Adds sets to the update phase which intersect the changed model.
    * @param {Backbone.Model} model
    */
   async onAdaptModelChange(model) {
@@ -130,7 +130,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Adds sets to the update phase which intersect the changed model
+   * Adds sets to the update phase which intersect the changed model.
    * @param {ModelEvent} event
    */
   async onAdaptModelChangeBubble(event) {
@@ -142,7 +142,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Adds sets to the leave and visit phase which are local to the previous and current location
+   * Adds sets to the leave and visit phase which are local to the previous and current location.
    * @param {Location} location
    */
   async onRouterLocation(location) {
@@ -157,7 +157,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Adds sets to the restart phase which are on the model id
+   * Adds sets to the restart phase which are on the model id.
    * @param {Backbone.Model} model
    */
   onAdaptModelReset(model) {
@@ -167,7 +167,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Adds sets to the reset phase which are on the set.modelId
+   * Adds sets to the reset phase which are on the set.modelId.
    * @param {IntersectionSet} set
    */
   onScoringSetReset(set) {
@@ -178,7 +178,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Adds sets to the update phase which intersect the set.modelId
+   * Adds sets to the update phase which intersect the set.modelId.
    * @param {IntersectionSet} set
    */
   onScoringSetUpdate(set) {
@@ -187,7 +187,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Send all sets into the init phase
+   * Send all sets into the init phase.
    */
   async init () {
     const sets = getAllSets();
@@ -195,7 +195,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Send all sets into the restore phase
+   * Send all sets into the restore phase.
    * @fires Adapt#scoring:restored
    */
   async restore () {
@@ -205,7 +205,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Send all sets into the start phase
+   * Send all sets into the start phase.
    * @fires Adapt#scoring:start
    */
   async start () {
@@ -215,7 +215,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Send all sets into the reset phase
+   * Send all sets into the reset phase.
    */
   async reset () {
     const sets = getAllSets();
@@ -223,7 +223,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Send givens sets into the restart phase
+   * Send givens sets into the restart phase.
    */
   async restart (sets) {
     sets = sets.filter(set => !set.intersectionParent);
@@ -231,7 +231,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Send givens sets into the leave phase
+   * Send givens sets into the leave phase.
    */
   async leave (sets) {
     sets = sets.filter(set => !set.intersectionParent);
@@ -239,7 +239,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Send givens sets into the visit phase
+   * Send givens sets into the visit phase.
    */
   async visit (sets) {
     sets = sets.filter(set => !set.intersectionParent);
@@ -247,7 +247,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Send givens sets into the update phase
+   * Send givens sets into the update phase.
    * @fires Adapt#scoring:update
    */
   async update (sets) {
@@ -257,7 +257,7 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Returns the renderer
+   * Returns the renderer.
    * @returns {LifecycleRenderer}
    */
   get renderer() {

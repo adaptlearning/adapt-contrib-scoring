@@ -10,7 +10,7 @@ import {
 /** @typedef {import("../IntersectionSet").default} IntersectionSet */
 
 /**
- * Returns all sets or all sets without the specified excludeParent
+ * Returns all sets or all sets without the specified excludeParent.
  * @param {Object} [options]
  * @param {IntersectionSet} [options.excludeParent=null]
  * @returns {IntersectionSet[]}
@@ -21,7 +21,7 @@ export function getAllSets({ excludeParent = null } = {}) {
 }
 
 /**
- * Filters sets by type
+ * Filters sets by type.
  * @param {IntersectionSet[]} sets
  * @param {string} type
  * @returns {IntersectionSet[]}
@@ -31,8 +31,8 @@ export function filterSetsByType(sets, type) {
 }
 
 /**
- * Filter sets which models intersect the given model id
- * This is useful for update behaviour on a model change
+ * Filter sets which models intersect the given model id.
+ * This is useful for update behaviour on a model change.
  * @param {IntersectionSet[]} sets
  * @param {string} id
  * @returns {IntersectionSet[]}
@@ -46,7 +46,7 @@ export function filterSetsByIntersectingModelId(sets, id) {
 }
 
 /**
- * Filter sets which models intersect the given models
+ * Filter sets which models intersect the given models.
  * @param {IntersectionSet[]} sets
  * @param {string} id
  * @returns {IntersectionSet[]}
@@ -60,8 +60,8 @@ export function filterSetsByIntersectingModels(sets, models) {
 }
 
 /**
- * Filter sets which live on the given model
- * This is useful for resetting behaviour over a given model id
+ * Filter sets which live on the given model.
+ * This is useful for resetting behaviour over a given model id.
  * @param {IntersectionSet[]} sets
  * @param {string} id
  * @returns {IntersectionSet[]}
@@ -71,8 +71,8 @@ export function filterSetsByModelId(sets, id) {
 }
 
 /**
- * Filter sets which are descendants from the given model, but also only inside the relevant content object
- * This is useful for finding visit and leave subsets on a content object
+ * Filter sets which are descendants from the given model, but also only inside the relevant content object.
+ * This is useful for finding visit and leave subsets on a content object.
  * @param {IntersectionSet[]} sets
  * @param {string} id
  * @returns {IntersectionSet[]}
@@ -100,7 +100,7 @@ export function filterSetsByLocalModelId(sets, id) {
 }
 
 /**
- * Finds a set by id
+ * Finds a set by id.
  * @param {IntersectionSet[]} sets
  * @param {string} id
  * @returns {IntersectionSet}

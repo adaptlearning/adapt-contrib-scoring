@@ -67,7 +67,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Clear the sets
+   * Clear the sets.
    * @listens Data#loading
    */
   onDataLoading() {
@@ -76,7 +76,7 @@ export class Scoring extends Backbone.Controller {
 
   /**
    * Configure the main scoring passmark with TotalSets and setup backward compatibility
-   * for legacy adapt-contrib-assessment related components and extensions
+   * for legacy adapt-contrib-assessment related components and extensions.
    * @listens Adapt#app:dataReady
    */
   onAppDataReady() {
@@ -86,7 +86,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns a boolean if adapt-contrib-assessment related compatibility is enabled
+   * Returns a boolean if adapt-contrib-assessment related compatibility is enabled.
    * @return {boolean}
    */
   get isBackwardCompatible() {
@@ -94,7 +94,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns registered root sets
+   * Returns registered root sets.
    * @returns {IntersectionSet[]}
    */
   get sets() {
@@ -102,7 +102,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Removes all registered root sets
+   * Removes all registered root sets.
    */
   clear() {
     this._sets?.forEach(set => this.deregister(set));
@@ -125,7 +125,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Deregister a configured root scoring set
+   * Deregister a configured root scoring set.
    * @param {IntersectionSet} oldSet
    * @fires Adapt#{set.type}:deregister
    * @fires Adapt#scoring:deregister
@@ -138,7 +138,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Force all registered sets to recalculate their states
+   * Force all registered sets to recalculate their states.
    * @fires Adapt#scoring:update
    */
   async update() {
@@ -149,7 +149,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Reset all subsets which can be reset
+   * Reset all subsets which can be reset.
    * @fires Adapt#scoring:reset
    */
   async reset() {
@@ -160,7 +160,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns a registered root set by id
+   * Returns a registered root set by id.
    * @param {string} id
    * @returns {IntersectionSet}
    */
@@ -169,7 +169,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns registered root sets of type
+   * Returns registered root sets of type.
    * @param {string} type
    * @returns {IntersectionSet[]}
    */
@@ -178,7 +178,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns registered root sets intersecting the given model id
+   * Returns registered root sets intersecting the given model id.
    * @param {string} id
    * @returns {IntersectionSet[]}
    */
@@ -187,7 +187,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns a root set or intersection set by id path
+   * Returns a root set or intersection set by id path.
    * example: id.id.id
    * @param {string|[string]} path
    * @returns {IntersectionSet}
@@ -198,7 +198,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns sets or intersection sets by query
+   * Returns sets or intersection sets by query.
    * @param {string} query
    * @returns {IntersectionSet[]}
    */
@@ -207,7 +207,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns a set or intersection set by query
+   * Returns a set or intersection set by query.
    * @param {string} query
    * @returns {IntersectionSet}
    */

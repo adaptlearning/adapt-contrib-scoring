@@ -1,5 +1,5 @@
 /**
- * Returns only unique items
+ * Returns only unique items.
  * @param {any[]} items
  * @returns {any[]}
  */
@@ -8,7 +8,7 @@ export function unique(items) {
 }
 
 /**
- * Performs addition on the property `by` of the items, either by string or by function return value
+ * Performs addition on the property `by` of the items, either by string or by function return value.
  * @param {Object[]} items A list of items from which to sum a property or function result
  * @param {string|Function} by The name of the property to sum or a function returning the value to sum
  * @returns {number}
@@ -23,7 +23,7 @@ export function sum(items, by) {
 }
 
 /**
- * Returns an array of all combinations of the column row values
+ * Returns an array of all combinations of the column row values.
  * [
  *  [1,2], [4,5], [6,7,8]
  * ] = [

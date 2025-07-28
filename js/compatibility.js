@@ -16,7 +16,7 @@ export function isBackwardCompatible(scoring) {
 }
 
 /**
- * Polyfill for Adapt.assessment
+ * Polyfill for Adapt.assessment.
  * @param {Scoring} scoring
  */
 export function setupBackwardCompatibility(scoring) {
@@ -36,7 +36,7 @@ export function setupBackwardCompatibility(scoring) {
 }
 
 /**
- * Polyfill for assessmentState
+ * Polyfill for assessmentState.
  * @param {Scoring} scoring
  */
 export function getCompatibilityState(scoring) {
@@ -61,7 +61,7 @@ export function getCompatibilityState(scoring) {
 }
 
 /**
- * Polyfill for triggering assessment:restored event
+ * Polyfill for triggering assessment:restored event.
  * @param {Scoring} scoring
  * @fires Adapt#assessment:restored
  */
@@ -70,7 +70,7 @@ function onScoringRestored(scoring) {
 }
 
 /**
- * Polyfill for triggering assessment:complete event
+ * Polyfill for triggering assessment:complete event.
  * @param {Scoring} scoring
  * @fires Adapt#assessment:complete
  */

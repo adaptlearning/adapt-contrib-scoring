@@ -1,5 +1,5 @@
 /**
- * Turn any JSON into a semi-unique hash string, representing a state
+ * Turn any JSON into a semi-unique hash string, representing a state.
  * @param {any} dataToHash
  * @returns {string}
  */
@@ -12,9 +12,9 @@ export function hash(dataToHash) {
 }
 
 /**
- * Useful for determining if a state has changed from a series of JSON variables
- * Store the latest hash of dataToHash at subject[_subjectKey] = hash
- * On subsequent call, return true/false indicating that the data has changed
+ * Useful for determining if a state has changed from a series of JSON variables.
+ * Store the latest hash of dataToHash at subject[_subjectKey] = hash.
+ * On subsequent call, return true/false indicating that the data has changed.
  * @param {Object} subject The object on which to store the previous hash
  * @param {any} dataToHash Any JSON to hash as a state
  * @param {string} [subjectKey="_hash"]

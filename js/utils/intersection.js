@@ -6,7 +6,7 @@ import {
 /** @typedef {import("../IntersectionSet").default} IntersectionSet */
 
 /**
- * Return an intersection of all of the sets along a path
+ * Return an intersection of all of the sets along a path.
  * @param {[string]|string} path
  * @returns {IntersectionSet}
  */
@@ -22,9 +22,9 @@ export function getPathSetsIntersected(path) {
 }
 
 /**
- * Returns a cloned intersection subset from the given array of sets
- * Reduces from left to right, returning the class of the furthest right most set
- * It makes a pipe of parent-child relations which reduce the models in the next subset
+ * Returns a cloned intersection subset from the given array of sets.
+ * Reduces from left to right, returning the class of the furthest right most set.
+ * It makes a pipe of parent-child relations which reduce the models in the next subset.
  * @param {IntersectionSet[]} sets Chain of sets to intersect
  * @param {Object} [options]
  * @param {Object[][]} [options.filters=null] Part of query interface. An array of arrays of where objects to match at each intersection step. isComplete, isPopulated, etc

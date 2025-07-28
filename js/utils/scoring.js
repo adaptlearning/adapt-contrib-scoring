@@ -1,5 +1,5 @@
 /**
- * Returns the percentage position (between -100-100) of score between minScore and maxScore
+ * Returns the percentage position (between -100-100) of score between minScore and maxScore.
  * @param {number} score
  * @param {number} minScore
  * @param {number} maxScore

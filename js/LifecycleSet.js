@@ -11,8 +11,8 @@ export default class LifecycleSet extends IntersectionSet {
 
   /**
    * State object for the set.
-   * Note: Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans
-   * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc
+   * @note Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans.
+   * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc.
    * @type {State}
    */
   get state() {
@@ -21,7 +21,7 @@ export default class LifecycleSet extends IntersectionSet {
   }
 
   /**
-   * Signifies if onRestored returned true/false
+   * Signifies if onRestored returned true/false.
    * @returns {boolean}
    */
   get wasRestored() {
@@ -33,13 +33,13 @@ export default class LifecycleSet extends IntersectionSet {
   }
 
   /**
-   * Called after initialize on every model
+   * Called after initialize on every model.
    */
   async onInit() {}
 
   /**
-   * Called after init on every model
-   * Restore data from previous sessions
+   * Called after init on every model.
+   * Restore data from previous sessions.
    * @fires Adapt#scoring:[set.type]:restored
    * @fires Adapt#scoring:set:restored
    * @returns {Boolean} Signify if the set was restored or not
@@ -50,30 +50,30 @@ export default class LifecycleSet extends IntersectionSet {
   }
 
   /**
-   * Called on each set after onRestore, only if onRestore returns false
-   * Called on each set after a reset or intersecting set or model is reset
+   * Called on each set after onRestore, only if onRestore returns false.
+   * Called on each set after a reset or intersecting set or model is reset.
    */
   async onStart() {}
 
   /**
-   * Called on each local set when its contentobject is visited
+   * Called on each local set when its contentobject is visited.
    */
   async onVisit() {}
 
   /**
-   * Called on each local set when its contentobject is left
+   * Called on each local set when its contentobject is left.
    */
   async onLeave() {}
 
   /**
    * Called on each set when any intersecting model has changes to
    * _isAvailable, _isActive, _isVisited or _isInteractionComplete or
-   * an intersecting set called `.update()`
+   * an intersecting set called `.update()`.
    */
   async onUpdate() {}
 
   /**
-   * Add this set and all set intersecting the modelId to the update phase
+   * Add this set and all set intersecting the modelId to the update phase.
    * @fires Adapt#scoring:[set.type]:update
    * @fires Adapt#scoring:set:update
    */
@@ -85,7 +85,7 @@ export default class LifecycleSet extends IntersectionSet {
   }
 
   /**
-   * Resets the set and restarts all sets on the modelId
+   * Resets the set and restarts all sets on the modelId.
    * @fires Adapt#scoring:[set.type]:reset
    * @fires Adapt#scoring:set:reset
    */

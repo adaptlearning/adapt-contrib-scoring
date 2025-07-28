@@ -4,8 +4,8 @@ import OfflineStorage from 'core/js/offlineStorage';
 
 /**
  * Saves and restores state by { name: { id: 'data' } } in the offlineStorage API.
- * Note: Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans
- * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc
+ * @note Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans
+ * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc.
  */
 export default class State {
 
@@ -22,7 +22,7 @@ export default class State {
   }
 
   /**
-   * The namespace in offlineStorage under which to save the id property
+   * The namespace in offlineStorage under which to save the id property.
    * @returns {string}
    */
   get name() {
@@ -30,16 +30,16 @@ export default class State {
   }
 
   /**
-   * The id against which to store the data in offlineStorage
+   * The id against which to store the data in offlineStorage.
    */
   get id() {
     return this._id ?? this.set.id;
   }
 
   /**
-   * Returns the saved data
-   * Note: Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans
-   * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc
+   * Returns the saved data.
+   * @note Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans.
+   * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc.
    * @returns {any}
    */
   restore() {
@@ -49,9 +49,9 @@ export default class State {
   }
 
   /**
-   * Saves the data
-   * Note: Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans
-   * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc
+   * Saves the data.
+   * @note Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans.
+   * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc.
    * @returns {boolean} If offlineStorage was updated
    */
   save (data) {
@@ -64,7 +64,7 @@ export default class State {
   }
 
   /**
-   * Clears the saved data in the namespace
+   * Clears the saved data in the namespace.
    */
   clear() {
     const store = OfflineStorage.get(this.name) ?? {};

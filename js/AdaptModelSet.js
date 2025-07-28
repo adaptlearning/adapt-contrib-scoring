@@ -18,7 +18,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Comparison function for type groups
+   * Comparison function for type groups.
    * query example: `[modelTypeGroup=question]`
    * @param {string} group One of course|contentobject|menu|page|group|article|block|component|question
    * @returns {boolean}
@@ -28,7 +28,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Comparison property for model types
+   * Comparison property for model types.
    * query example: `[modelType=block]`
    * @returns {string} One of course|menu|page|article|block|component
    */
@@ -37,7 +37,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Comparison property for model component strings
+   * Comparison property for model component strings.
    * query example: `[modelComponent=mcq]`
    * @returns {string} One of mcq|gmcq|slider|graphic|... etc
    */
@@ -53,7 +53,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Returns whether the set is complete
+   * Returns whether the set is complete.
    * query example: `(isComplete)` or `(isComplete=false)`
    * @returns {boolean}
    */
@@ -62,7 +62,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Returns whether the set is incomplete
+   * Returns whether the set is incomplete.
    * query example: `(isIncomplete)` alias for `(isComplete=false)`
    * @returns {boolean}
    */
@@ -71,7 +71,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Returns whether the set is passed
+   * Returns whether the set is passed.
    * query example: `(isPassed)` alias for `(isComplete)`
    * @returns {boolean}
    */
@@ -80,7 +80,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Returns whether the set is isFailed
+   * Returns whether the set is isFailed.
    * query example: `(isFailed)`
    * @returns {boolean}
    */
@@ -89,7 +89,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Returns whether the set is optional
+   * Returns whether the set is optional.
    * query example: `(isOptional)`
    * @returns {boolean}
    */
@@ -98,7 +98,7 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Returns whether the set is available
+   * Returns whether the set is available.
    * query example: `(_isAvailable)`
    * @returns {boolean}
    */

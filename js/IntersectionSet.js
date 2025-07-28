@@ -83,8 +83,8 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Create a clone of this instance, intersected over the intersectionParent
-   * This will reduce this.models by intersecting with the intersectionParent.models
+   * Create a clone of this instance, intersected over the intersectionParent.
+   * This will reduce this.models by intersecting with the intersectionParent.models.
    * @param {IntersectionSet} intersectionParent
    * @returns {IntersectionSet}
    */
@@ -99,7 +99,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Register the set
+   * Register the set.
    * @private
    * @fires Adapt#scoring:[set.type]:register
    * @fires Adapt#scoring:set:register
@@ -126,7 +126,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns the set type
+   * Returns the set type.
    * query example: `type` or `[type=type]`
    * @returns {string}
    */
@@ -139,7 +139,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns the set title
+   * Returns the set title.
    * @returns {string}
    */
   get title() {
@@ -151,7 +151,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Lifecycle processing order
+   * Lifecycle processing order.
    * @returns {number}
    */
   get order() {
@@ -159,7 +159,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns whether the set is enabled
+   * Returns whether the set is enabled.
    * query example: `(isEnabled)` or `(isEnabled=false)`
    * @returns {boolean}
    */
@@ -168,7 +168,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns whether the set is optional
+   * Returns whether the set is optional.
    * query example: `(isOptional)` or `(isOptional=false)`
    * @returns {boolean}
    */
@@ -177,7 +177,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns whether the set is available
+   * Returns whether the set is available.
    * query example: `(isAvailable)` or `(isAvailable=false)`
    * @returns {boolean}
    */
@@ -186,7 +186,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns whether the set's model is available in the model hierarchy
+   * Returns whether the set's model is available in the model hierarchy.
    * @return {boolean}
    */
   get isModelAvailableInHierarchy() {
@@ -194,7 +194,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Check to see if there are any child models
+   * Check to see if there are any child models.
    * query example: `(isPopulated)` or `(isPopulated=false)`
    * @returns {boolean}
    */
@@ -204,7 +204,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Check to see if there are any child models
+   * Check to see if there are any child models.
    * query example: `(isNotPopulated)` alias for `(isPopulated=false)`
    * @returns {boolean}
    */
@@ -213,7 +213,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all intersected subsets
+   * Returns all intersected subsets.
    * @returns {IntersectionSet[]}
    */
   get intersectedSubsets() {
@@ -223,7 +223,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all intersected subsets that contain models
+   * Returns all intersected subsets that contain models.
    * @returns {IntersectionSet[]}
    */
   get populatedIntersectedSubsets() {
@@ -231,7 +231,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns the parent set over which this set is intersected
+   * Returns the parent set over which this set is intersected.
    * @returns {IntersectionSet|null}
    */
   get intersectionParent() {
@@ -243,7 +243,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Is an intersected clone
+   * Is an intersected clone.
    * @returns {boolean}
    */
   get isIntersectedSet() {
@@ -251,7 +251,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * If an intersected set, returns this set including its ancestors
+   * If an intersected set, returns this set including its ancestors.
    * @returns {IntersectionSet[]}
    */
   get subsetPath() {
@@ -265,7 +265,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * The config or origin model at which the set is oriented
+   * The config or origin model at which the set is oriented.
    * @returns {Backbone.Model}
    */
   get model() {
@@ -277,7 +277,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * The config or origin model id, used for querying
+   * The config or origin model id, used for querying.
    * query example: `[modelId=modelId]`
    * @returns {string}
    */
@@ -287,9 +287,9 @@ export default class IntersectionSet extends Backbone.Controller {
 
   /**
    * Returns a unique array of subject models, filtered according to hierarchy intersections
-   * with the intersectionParent.models
-   * By default will return the children and detached models of this.model
-   * If this.model is set, then the overridden models will be used
+   * with the intersectionParent.models.
+   * By default will return the children and detached models of this.model.
+   * If this.model is set, then the overridden models will be used.
    * @returns {Backbone.Model[]}
    */
   get models() {
@@ -302,7 +302,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns models filtered according to hierarchy intersections with the intersectionParent.models
+   * Returns models filtered according to hierarchy intersections with the intersectionParent.models.
    * @param {Backbone.Model[]} models
    * @returns {Backbone.Model[]}
    */
@@ -311,7 +311,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all `_isAvailable` models, excluding detached models
+   * Returns all `_isAvailable` models, excluding detached models.
    * @returns {ComponentModel[]}
    */
   get availableModels() {
@@ -319,7 +319,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all component models regardless of `_isAvailable`
+   * Returns all component models regardless of `_isAvailable`.
    * @returns {ComponentModel[]}
    */
   get components() {
@@ -332,7 +332,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all `_isAvailable` component  models, excluding detached models
+   * Returns all `_isAvailable` component  models, excluding detached models.
    * @returns {ComponentModel[]}
    */
   get availableComponents() {
@@ -340,7 +340,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all question models regardless of `_isAvailable`
+   * Returns all question models regardless of `_isAvailable`.
    * @returns {QuestionModel[]}
    */
   get questions() {
@@ -348,7 +348,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all `_isAvailable` question models, excluding detached models
+   * Returns all `_isAvailable` question models, excluding detached models.
    * @returns {QuestionModel[]}
    */
   get availableQuestions() {
@@ -356,7 +356,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all presentation component models regardless of `_isAvailable`
+   * Returns all presentation component models regardless of `_isAvailable`.
    * @returns {QuestionModel[]}
    */
   get presentationComponents() {
@@ -364,7 +364,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all `_isAvailable` presentation component models, excluding detached models
+   * Returns all `_isAvailable` presentation component models, excluding detached models.
    * @returns {QuestionModel[]}
    */
   get availablePresentationComponents() {
@@ -372,7 +372,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all trackable components - excludes trickle etc
+   * Returns all trackable components - excludes trickle etc.
    * @returns {ComponentModel[]}
    */
   get trackableComponents() {
@@ -380,7 +380,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns all `_isAvailable` trackable components - excludes trickle etc, excluding detached models
+   * Returns all `_isAvailable` trackable components - excludes trickle etc, excluding detached models.
    * @returns {ComponentModel[]}
    */
   get availableTrackableComponents() {
@@ -388,7 +388,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns intersected subsets by id
+   * Returns intersected subsets by id.
    * @param {string} setId
    * @returns {IntersectionSet[]}
    */
@@ -400,7 +400,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns intersected subsets by type
+   * Returns intersected subsets by type.
    * @param {string} setType
    * @returns {IntersectionSet[]}
    */
@@ -412,7 +412,7 @@ export default class IntersectionSet extends Backbone.Controller {
   }
 
   /**
-   * Returns intersected subsets by modelId
+   * Returns intersected subsets by modelId.
    * @param {string} modelId
    * @returns {IntersectionSet[]}
    */

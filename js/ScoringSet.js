@@ -62,7 +62,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns whether the set should be included in the total score
+   * Returns whether the set should be included in the total score.
    * @returns {boolean}
    */
   get isScoreIncluded() {
@@ -74,7 +74,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns whether the set needs to be completed
+   * Returns whether the set needs to be completed.
    * @returns {boolean}
    */
   get isCompletionRequired() {
@@ -86,7 +86,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns the minimum score
+   * Returns the minimum score.
    * @returns {number}
    */
   get minScore() {
@@ -94,7 +94,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns the maximum score
+   * Returns the maximum score.
    * @returns {number}
    */
   get maxScore() {
@@ -102,7 +102,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns the score
+   * Returns the score.
    * @returns {number}
    */
   get score() {
@@ -110,7 +110,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns a percentage score relative to a positive minimum or zero and maximum values
+   * Returns a percentage score relative to a positive minimum or zero and maximum values.
    * @returns {number}
    */
   get scaledScore() {
@@ -118,7 +118,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns a score as a string to include "+" operator for positive scores
+   * Returns a score as a string to include "+" operator for positive scores.
    * @returns {string}
    */
   get scoreAsString() {
@@ -127,7 +127,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns the number of correctly answered available questions
+   * Returns the number of correctly answered available questions.
    * @note Assumes the same number of questions are used in each attempt
    * @returns {number}
    */
@@ -136,7 +136,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns the number of available questions
+   * Returns the number of available questions.
    * @returns {number}
    */
   get maxCorrectness() {
@@ -144,7 +144,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns the percentage of correctly answered questions
+   * Returns the percentage of correctly answered questions.
    * @returns {number}
    */
   get scaledCorrectness() {
@@ -152,7 +152,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns whether the set is completed
+   * Returns whether the set is completed.
    * query example: `(isComplete)` or `(isComplete=false)`
    * @returns {boolean}
    */
@@ -161,7 +161,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns whether the set is incomplete
+   * Returns whether the set is incomplete.
    * query example: `(isIncomplete)` alias for `(isComplete=false)`
    * @returns {boolean}
    */
@@ -170,7 +170,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns whether the configured passmark has been achieved
+   * Returns whether the configured passmark has been achieved.
    * query example: `(isPassed)`
    * @returns {boolean}
    */
@@ -179,7 +179,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns whether the configured passmark has been failed
+   * Returns whether the configured passmark has been failed.
    * query example: `(isFailed)` alias for `(isComplete,isPassed=false)`
    * @returns {boolean}
    */
@@ -188,7 +188,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * The objective object for the set. See SCORM cmi.objectives
+   * The objective object for the set. See SCORM cmi.objectives.
    * @returns {Objective}
    */
   get objective() {
@@ -224,7 +224,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Is executed on lifecycle update phase when isComplete=true
+   * Is executed on lifecycle update phase when isComplete=true.
    * @fires Adapt#scoring:[set.type]:complete
    * @fires Adapt#scoring:set:complete
    */
@@ -236,7 +236,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Is executed on lifecycle update phase when isPassed=true
+   * Is executed on lifecycle update phase when isPassed=true.
    * @fires Adapt#scoring:[set.type]:passed
    * @fires Adapt#scoring:set:passed
    */

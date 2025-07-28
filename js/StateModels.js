@@ -9,9 +9,9 @@ import data from 'core/js/data';
 export default class StateModels extends State {
 
   /**
-   * Returns the saved models
-   * Note: Uses trackingPosition which can be disrupted by changes to the order or substance of sub tracking id elements,
-   * such as changing the order of or the components in their block if the tracking id is on the blocks
+   * Returns the saved models.
+   * @note Uses trackingPosition which can be disrupted by changes to the order or substance of sub tracking id elements,
+   * such as changing the order of or the components in their block if the tracking id is on the blocks.
    * @returns {AdaptModel[]}
    */
   restore() {
@@ -21,9 +21,9 @@ export default class StateModels extends State {
   }
 
   /**
-   * Saves the given models
-   * Note: Uses trackingPosition which can be disrupted by changes to the order or substance of sub tracking id elements,
-   * such as changing the order of or the components in their block if the tracking id is on the blocks
+   * Saves the given models.
+   * @note Uses trackingPosition which can be disrupted by changes to the order or substance of sub tracking id elements,
+   * such as changing the order of or the components in their block if the tracking id is on the blocks.
    * @param {AdaptModel[]} models
    */
   save(models) {

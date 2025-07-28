@@ -141,8 +141,8 @@ export function filterModelsByIntersectingModels(modelsA, modelsB) {
 }
 
 /**
- * Alternative version of getAllDescendantModels, which also returns detached children
- * Uses Data.findById(parentId) rather than model.getChildren()
+ * Alternative version of getAllDescendantModels, which also returns detached children.
+ * Uses Data.findById(parentId) rather than model.getChildren().
  * @param {Backbone.Model} model
  * @param {Object} [options]
  * @param {boolean} [options.isParentFirst=true]

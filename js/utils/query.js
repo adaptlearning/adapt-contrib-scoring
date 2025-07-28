@@ -15,7 +15,7 @@ const queryColumnRegEx = /([^ []*(?:[[(]{1}[^\])]+[\])]{1})*)/g;
 const queryColumnAttributeRegEx = /[[(]{1}[^\])]+[\])]{1}/g;
 
 /**
- * Takes a subset intersection query string and returns the resultant intersected subsets
+ * Takes a subset intersection query string and returns the resultant intersected subsets.
  * See (intersection query document)[../../INTERSECTION_QUERY.md]
  * @param {string} query
  * @returns {IntersectionSet[]}
@@ -48,7 +48,7 @@ export function getSubsetsByQuery(query) {
 }
 
 /**
- * Takes a subset intersection query string and transforms it into an array of select and filter objects
+ * Takes a subset intersection query string and transforms it into an array of select and filter objects.
  * See (intersection query document)[../../INTERSECTION_QUERY.md]
  * @param {string} query
  * @returns {Object[][]}

@@ -37,7 +37,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Returns an object of dynamically created named queue addition functions
+   * Returns an object of dynamically created named queue addition functions.
    * @returns {Object}
    */
   get render() {
@@ -45,7 +45,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Creates the named queue addition functions
+   * Creates the named queue addition functions.
    */
   createRenderFunctionsAndQueues() {
     for (const name of this.PHASE_NAMES) {
@@ -57,7 +57,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Returns the sets in the phase queue
+   * Returns the sets in the phase queue.
    * @param {string} phaseName
    * @returns {IntersectionSet[]}
    */
@@ -66,8 +66,8 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Add the sets to the relevant phase queue if they're not in there already
-   * Starts the batch renderer
+   * Add the sets to the relevant phase queue if they're not in there already.
+   * Starts the batch renderer.
    * @param {string} phaseName
    * @param {IntersectionSet} sets
    */
@@ -83,7 +83,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   };
 
   /**
-   * Force adapt to wait
+   * Force adapt to wait.
    */
   startAdaptWait() {
     if (this.hasStartedWaiting) return;
@@ -92,7 +92,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Render the batch
+   * Render the batch.
    * @fires this#rendered
    */
   async startBatchRender () {
@@ -119,7 +119,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Tries to stop adapt from waiting after all of the queues are empty
+   * Tries to stop adapt from waiting after all of the queues are empty.
    * @returns {boolean} Signifying if waiting has ended
    */
   tryEndAdaptWait() {
@@ -130,7 +130,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Returns true/false if the queues are empty
+   * Returns true/false if the queues are empty.
    * @returns {Boolean}
    */
   get areQueuesEmpty() {
@@ -138,7 +138,7 @@ export default class LifecycleRenderer extends Backbone.Controller {
   }
 
   /**
-   * Resolves when the next batch has been rendered
+   * Resolves when the next batch has been rendered.
    */
   async onBatchRendered() {
     return new Promise(resolve => this.once('rendered', resolve));
@@ -146,10 +146,10 @@ export default class LifecycleRenderer extends Backbone.Controller {
 
   /**
    * This function is not used, but it is here to demonstrate what immediate
-   * vs batched rendering looks like
+   * vs batched rendering looks like.
    * It renders phases on the sets immediately, rather than deduplicating and
    * batch processing them, it results in many more event calls but should give
-   * otherwise identical behaviour (assuming the sets behave properly)
+   * otherwise identical behaviour (assuming the sets behave properly).
    */
   async renderImmediatePhaseSets (phaseName, sets) {
     if (!sets?.length) return;

@@ -20,7 +20,7 @@ export default class Objective {
   }
 
   /**
-   * Define the objective for reporting purposes
+   * Define the objective for reporting purposes.
    */
   init() {
     const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
@@ -30,7 +30,7 @@ export default class Objective {
   }
 
   /**
-   * Reset the objective data
+   * Reset the objective data.
    */
   reset() {
     if (this.set.isComplete) return;
@@ -40,7 +40,7 @@ export default class Objective {
   }
 
   /**
-   * Complete the objective
+   * Complete the objective.
    * TODO: Always updates to latest data - is this desired?
    */
   complete() {

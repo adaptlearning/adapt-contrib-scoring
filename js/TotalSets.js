@@ -48,7 +48,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns all models from sets marked with `_isScoreIncluded` or `_isCompletionRequired`, filtered and intersected where appropriate
+   * Returns all models from sets marked with `_isScoreIncluded` or `_isCompletionRequired`, filtered and intersected where appropriate.
    * @returns {Backbone.Model[]}
    */
   get models() {
@@ -62,7 +62,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns all sets marked with `_isScoreIncluded` which intersect the models
+   * Returns all sets marked with `_isScoreIncluded` which intersect the models.
    * @returns {ScoringSet[]}
    */
   get scoringSets() {
@@ -75,7 +75,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns all sets marked with `_isCompletionRequired` which intersect the models
+   * Returns all sets marked with `_isCompletionRequired` which intersect the models.
    * @returns {ScoringSet[]}
    */
   get completionSets() {
@@ -88,7 +88,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns the minimum score of all `_isScoreIncluded` subsets
+   * Returns the minimum score of all `_isScoreIncluded` subsets.
    * @returns {number}
    */
   get minScore() {
@@ -96,7 +96,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns the maximum score of all `_isScoreIncluded` subsets
+   * Returns the maximum score of all `_isScoreIncluded` subsets.
    * @returns {number}
    */
   get maxScore() {
@@ -104,7 +104,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns the score of all `_isScoreIncluded` subsets
+   * Returns the score of all `_isScoreIncluded` subsets.
    * @returns {number}
    */
   get score() {
@@ -112,7 +112,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns a percentage score relative to a positive minimum or zero and maximum values
+   * Returns a percentage score relative to a positive minimum or zero and maximum values.
    * @returns {number}
    */
   get scaledScore() {
@@ -120,7 +120,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns the number of correctly answered available questions
+   * Returns the number of correctly answered available questions.
    * @returns {number}
    */
   get correctness() {
@@ -128,7 +128,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns the number of available questions
+   * Returns the number of available questions.
    * @returns {number}
    */
   get maxCorrectness() {
@@ -136,7 +136,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns the percentage of correctly answered questions
+   * Returns the percentage of correctly answered questions.
    * @returns {number}
    */
   get scaledCorrectness() {
@@ -144,7 +144,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns the passmark model
+   * Returns the passmark model.
    * @returns {Passmark}
    */
   get passmark() {
@@ -152,7 +152,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns whether all root sets marked with `_isCompletionRequired` are completed
+   * Returns whether all root sets marked with `_isCompletionRequired` are completed.
    * @returns {boolean}
    */
   get isComplete() {
@@ -180,7 +180,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns whether any root sets marked with `_isScoreIncluded` are failed and cannot be reset
+   * Returns whether any root sets marked with `_isScoreIncluded` are failed and cannot be reset.
    * @todo Add `canReset` to `ScoringSet`?
    * @returns {boolean}
    */
@@ -189,7 +189,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns whether any root sets marked with `_isScoreIncluded` can be reset
+   * Returns whether any root sets marked with `_isScoreIncluded` can be reset.
    * @todo Add `canReset` to `ScoringSet`?
    * @returns {boolean}
    */

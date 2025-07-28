@@ -10,7 +10,7 @@ import StateModels from './StateModels';
 export default class StateSetModelChildren extends StateModels {
 
   /**
-   * Define a shared children namespace of 'ch' in offlineStorage
+   * Define a shared children namespace of 'ch' in offlineStorage.
    * @returns {string}
    */
   get name() {
@@ -18,7 +18,7 @@ export default class StateSetModelChildren extends StateModels {
   }
 
   /**
-   * Use the set.modelId for each model children
+   * Use the set.modelId for each model children.
    * @returns {string}
    */
   get id() {
@@ -26,7 +26,7 @@ export default class StateSetModelChildren extends StateModels {
   }
 
   /**
-   * Restores the set.model.getChildren()
+   * Restores the set.model.getChildren().
    * @returns {boolean} If restore had models
    */
   restore() {
@@ -37,7 +37,7 @@ export default class StateSetModelChildren extends StateModels {
   }
 
   /**
-   * Saves the set.model.getChildren()
+   * Saves the set.model.getChildren().
    * @returns {boolean} If offlineStorage has been updated
    */
   save() {
