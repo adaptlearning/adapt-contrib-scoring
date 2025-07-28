@@ -3,8 +3,8 @@ import data from 'core/js/data';
 /** @typedef {import("core/js/models/adaptModel").default} AdaptModel */
 
 /**
- * An extension of State
- * Save and restore a collection of models
+ * An extension of State.
+ * Save and restore a collection of models.
  */
 export default class StateModels extends State {
 

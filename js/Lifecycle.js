@@ -19,7 +19,7 @@ import Backbone from 'backbone';
 /** @typedef {import("core/js/location").default} Location */
 
 /**
- * Lifecycle controller
+ * Lifecycle controller.
  */
 export default class Lifecycle extends Backbone.Controller {
 

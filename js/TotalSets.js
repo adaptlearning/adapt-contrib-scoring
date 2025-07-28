@@ -17,12 +17,12 @@ import {
 } from './utils/math';
 
 /**
- * A set of sets, it can sum the scores of the root or intersecting sets
+ * A set of sets, it can sum the scores of the root or intersecting sets.
  *
  * It extends `ScoringSet` with the caveat that it sums properties from root or
- * intersecting scoring sets and completion sets rather than root or intersecting models
+ * intersecting scoring sets and completion sets rather than root or intersecting models.
  *
- * It represents the overall completion, score, correctness, pass and fail of the course
+ * It represents the overall completion, score, correctness, pass and fail of the course.
  */
 export default class TotalSets extends ScoringSet {
 
@@ -49,7 +49,7 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns all models from sets marked with `_isScoreIncluded` or `_isCompletionRequired`, filtered and intersected where appropriate
-   * @returns {[Backbone.Model]}
+   * @returns {Backbone.Model[]}
    */
   get models() {
     const allScoringSets = Adapt.scoring.sets.filter(({ isScoreIncluded }) => isScoreIncluded);

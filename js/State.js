@@ -3,7 +3,7 @@ import OfflineStorage from 'core/js/offlineStorage';
 /** @typedef {import("../LifecycleSet").default} LifecycleSet */
 
 /**
- * Saves and restores state by { name: { id: 'data' } } in the offlineStorage API
+ * Saves and restores state by { name: { id: 'data' } } in the offlineStorage API.
  * Note: Can only save and restore arrays of arrays, arrays of only numbers and arrays of only booleans
  * i.e. [[1,2,3,4],[true,false,true,false]] or [true,false,true] etc
  */

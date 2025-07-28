@@ -4,7 +4,7 @@ import COMPLETION_STATE from 'core/js/enums/completionStateEnum';
 /** @typedef {import("../IntersectionSet").default} IntersectionSet */
 
 /**
- * Registers an objective with the offlineStorage API
+ * Registers an objective with the offlineStorage API.
  * see SCORM cmi.objectives
  */
 export default class Objective {

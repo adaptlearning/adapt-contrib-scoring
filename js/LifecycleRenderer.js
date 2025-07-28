@@ -7,7 +7,7 @@ import Logging from 'core/js/logging';
 
 /**
  * Transforms a lifecycle definition into fps batched, phase queues, where the
- * queues are executed in phase and definition order at each cycle
+ * queues are executed in phase and definition order at each cycle.
  */
 export default class LifecycleRenderer extends Backbone.Controller {
 

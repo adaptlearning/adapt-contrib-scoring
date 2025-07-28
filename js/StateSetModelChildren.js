@@ -2,10 +2,10 @@ import StateModels from './StateModels';
 /** @typedef {import("core/js/models/adaptModel").default} AdaptModel */
 
 /**
- * An extension of StateModels
- * Save and restore the collection of children from the set model
- * Share a space under ch[modelId] so that multiple plugins can
- *  coordinate on the model children
+ * An extension of StateModels.
+ * Saves and restores the collection of children from the set model.
+ * Shares a space under offlineStorage ch[modelId] so that multiple
+ * plugins can coordinate on the model children.
  */
 export default class StateSetModelChildren extends StateModels {
 

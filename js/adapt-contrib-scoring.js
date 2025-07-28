@@ -46,6 +46,10 @@ export {
   StateModels
 };
 
+/**
+ * Scoring API based upon making sets of questions with custom scoring, correctness
+ * and completion behaviour.
+ */
 export class Scoring extends Backbone.Controller {
 
   initialize() {
