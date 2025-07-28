@@ -1,5 +1,5 @@
 /**
- * Stores the configuration for passing
+ * Stores the configuration for passing.
  */
 export default class Passmark {
 
