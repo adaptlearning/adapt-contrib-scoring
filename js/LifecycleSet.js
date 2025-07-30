@@ -85,7 +85,7 @@ export default class LifecycleSet extends IntersectionSet {
   }
 
   /**
-   * Returns whether any root sets marked with `_isScoreIncluded` can be reset.
+   * Returns a boolean if this set can be reset.
    * @returns {boolean}
    */
   get canReset() {
