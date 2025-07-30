@@ -190,7 +190,6 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns whether any root sets marked with `_isScoreIncluded` can be reset.
-   * @todo Add `canReset` to `ScoringSet`?
    * @returns {boolean}
    */
   get canReset() {

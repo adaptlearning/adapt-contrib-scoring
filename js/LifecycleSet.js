@@ -85,6 +85,14 @@ export default class LifecycleSet extends IntersectionSet {
   }
 
   /**
+   * Returns whether any root sets marked with `_isScoreIncluded` can be reset.
+   * @returns {boolean}
+   */
+  get canReset() {
+    return true;
+  }
+
+  /**
    * Resets the set and restarts all sets on the modelId.
    * @fires Adapt#scoring:[set.type]:reset
    * @fires Adapt#scoring:set:reset
