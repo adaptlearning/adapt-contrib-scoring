@@ -152,6 +152,45 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
+   * Returns whether the set is correct.
+   * query example: `(isCorrect)` or `(isCorrect=false)`
+   * @returns {boolean|null}
+   */
+  get isCorrect() {
+    if (!this.isSubmitted) return null;
+    return (this.correctness === this.maxCorrectness);
+  }
+
+  /**
+   * Returns whether the set is partly correct.
+   * query example: `(isPartlyCorrect)` or `(isPartlyCorrect=false)`
+   * @returns {boolean|null}
+   */
+  get isPartlyCorrect() {
+    if (!this.isSubmitted) return null;
+    return (this.correctness < this.maxCorrectness);
+  }
+
+  /**
+   * Returns whether the set is incorrect.
+   * query example: `(isIncorrect)` or `(isIncorrect=false)`
+   * @returns {boolean|null}
+   */
+  get isIncorrect() {
+    if (!this.isSubmitted) return null;
+    return (!this.correctness && this.maxCorrectness);
+  }
+
+  /**
+   * Returns whether the set is submitted.
+   * query example: `(isSubmitted)` or `(isSubmitted=false)`
+   * @returns {boolean}
+   */
+  get isSubmitted() {
+    return this.model.get('_isSubmitted');
+  }
+
+  /**
    * Returns whether the set is completed.
    * query example: `(isComplete)` or `(isComplete=false)`
    * @returns {boolean}
@@ -181,10 +220,11 @@ export default class ScoringSet extends LifecycleSet {
   /**
    * Returns whether the configured passmark has been failed.
    * query example: `(isFailed)` alias for `(isComplete,isPassed=false)`
-   * @returns {boolean}
+   * @returns {boolean|null}
    */
   get isFailed() {
-    return (this.isComplete && this.isPassed === false);
+    if (!this.isSubmitted) return null;
+    return (this.isPassed === false);
   }
 
   /**

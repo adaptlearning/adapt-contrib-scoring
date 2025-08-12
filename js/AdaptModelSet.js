@@ -1,11 +1,11 @@
-import IntersectionSet from './IntersectionSet';
+import ScoringSet from './ScoringSet';
 import data from 'core/js/data';
 
 /**
  * A set which represents each AdaptModel from the `core/js/data` API.
  * Used for set intersection queries only, not for scoring.
  */
-export default class AdaptModelSet extends IntersectionSet {
+export default class AdaptModelSet extends ScoringSet {
 
   initialize(options = {}) {
     super.initialize({
@@ -53,24 +53,6 @@ export default class AdaptModelSet extends IntersectionSet {
   }
 
   /**
-   * Returns whether the set is complete.
-   * query example: `(isComplete)` or `(isComplete=false)`
-   * @returns {boolean}
-   */
-  get isComplete() {
-    return this.model.get('_isComplete');
-  }
-
-  /**
-   * Returns whether the set is incomplete.
-   * query example: `(isIncomplete)` alias for `(isComplete=false)`
-   * @returns {boolean}
-   */
-  get isIncomplete() {
-    return (this.isComplete === false);
-  }
-
-  /**
    * Returns whether the set is passed.
    * query example: `(isPassed)` alias for `(isComplete)`
    * @returns {boolean}
@@ -99,11 +81,16 @@ export default class AdaptModelSet extends IntersectionSet {
 
   /**
    * Returns whether the set is available.
-   * query example: `(_isAvailable)`
+   * query example: `(isAvailable)`
    * @returns {boolean}
    */
   get isAvailable() {
     return this.model.get('_isAvailable');
+  }
+
+  get feedback() {
+    if (!this.isSubmitted) return;
+    return this.model.getFeedback();
   }
 
 }
