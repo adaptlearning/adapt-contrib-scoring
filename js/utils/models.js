@@ -57,9 +57,12 @@ export function getModelChildren(model, { allowDetached = true } = {}) {
  * @returns {Backbone.Model[]}
  */
 export function findDescendantModels(model, typeGroup, { allowDetached = true } = {}) {
-  const models = getAllDescendantModels(model)
+  const models = getAllDescendantModels(model, {
+    filter: allowDetached
+      ? null
+      : isModelAttached
+  })
     .filter(model => model.isTypeGroup(typeGroup));
-  if (!allowDetached) return models.filter(isModelAttached);
   return models;
 }
 
@@ -146,12 +149,13 @@ export function filterModelsByIntersectingModels(modelsA, modelsB) {
  * @param {Backbone.Model} model
  * @param {Object} [options]
  * @param {boolean} [options.isParentFirst=true]
+ * @param {Function} [options.filter=null]
  * @returns {Backbone.Model[]}
  */
-export function getAllDescendantModels(model, { isParentFirst = true } = {}) {
+export function getAllDescendantModels(model, { isParentFirst = true, filter = null } = {}) {
   const descendants = [];
   const stack = [
-    [model]
+    [model].filter(model => filter?.(model) ?? true)
   ];
   const subject = [];
   while (stack.length) {
@@ -176,7 +180,9 @@ export function getAllDescendantModels(model, { isParentFirst = true } = {}) {
       descendants.push(nextModel);
     }
     const id = nextModel.get('_id');
-    const children = (modelsByParentId[id] ?? []).slice(0);
+    const children = (modelsByParentId[id] ?? [])
+      .slice(0)
+      .filter(child => filter?.(child) ?? true);
     const hasChildren = Boolean(children.length);
     if (hasChildren) {
       stack.push(children);
