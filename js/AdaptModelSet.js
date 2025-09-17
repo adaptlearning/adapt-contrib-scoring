@@ -1,4 +1,7 @@
 import ScoringSet from './ScoringSet';
+import {
+  isAvailableInHierarchy
+} from './utils';
 
 export default class AdaptModelSet extends ScoringSet {
 
@@ -55,15 +58,22 @@ export default class AdaptModelSet extends ScoringSet {
   /**
    * @override
    */
-  get models() {
+  get rawModels() {
     return [this.model];
   }
 
   /**
    * @override
    */
+  get isAvailable() {
+    return isAvailableInHierarchy(this.model);
+  }
+
+  /**
+   * @override
+   */
   get isComplete() {
-    return this._model.get('_isComplete');
+    return this.model.get('_isComplete');
   }
 
   /**
@@ -85,4 +95,3 @@ export default class AdaptModelSet extends ScoringSet {
    */
   onPassed() {}
 }
-

@@ -210,24 +210,11 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * Returns a unique array of models, filtered for `_isAvailable` and intersecting subsets hierarchies
-   * Always finish by calling `this.filterModels(models)`
+   * Returns all models regardless of `_isAvailable`
    * @returns {[Backbone.Model]}
    */
-  get models() {
-    Logging.error(`models must be overriden for ${this.constructor.name}`);
-  }
-
-  /**
-   * Check to see if there are any child models
-   * @returns {boolean}
-   */
-  get isPopulated() {
-    return Boolean(this.models?.length);
-  }
-
-  get isNotPopulated() {
-    return (this.isPopulated === false);
+  get rawModels() {
+    Logging.error(`rawModels must be overriden for ${this.constructor.name}`);
   }
 
   /**
@@ -235,7 +222,12 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {[ComponentModel]}
    */
   get rawComponents() {
-    return this.model.findDescendantModels('component');
+    return this.rawModels.reduce((components, model) => {
+      const models = model.isTypeGroup('component')
+        ? [model]
+        : model.findDescendantModels('component');
+      return components.concat(models);
+    }, []);
   }
 
   /**
@@ -243,7 +235,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {[QuestionModel]}
    */
   get rawQuestions() {
-    return this.model.findDescendantModels('question');
+    return this.rawComponents.filter(model => model.isTypeGroup('question'));
   }
 
   /**
@@ -255,14 +247,20 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Returns a unique array of models, filtered for `_isAvailable` and intersecting subsets hierarchies
+   * Always finish by calling `this.filterModels(models)`
+   * @returns {[Backbone.Model]}
+   */
+  get models() {
+    return this.filterModels(this.rawModels);
+  }
+
+  /**
    * Returns all `_isAvailable` component models
    * @returns {[ComponentModel]}
    */
   get components() {
-    return this.models.reduce((components, model) => {
-      model.isTypeGroup('component') ? components.push(model) : components.push(...model.findDescendantModels('component'));
-      return components;
-    }, []).filter(isAvailableInHierarchy);
+    return this.rawComponents.filter(isAvailableInHierarchy);
   }
 
   /**
@@ -278,15 +276,15 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {[QuestionModel]}
    */
   get questions() {
-    return this.components.filter(model => model.isTypeGroup('question'));
+    return this.rawQuestions.filter(isAvailableInHierarchy);
   }
 
   /**
    * Returns all `_isAvailable` presentation component models
-   * @returns {[QuestionModel]}
+   * @returns {[ComponentModel]}
    */
   get presentationComponents() {
-    return this.components.filter(model => !model.isTypeGroup('question'));
+    return this.rawPresentationComponents.filter(isAvailableInHierarchy);
   }
 
   /**
@@ -360,7 +358,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get canReset() {
-    return false
+    return false;
   }
 
   /**
@@ -368,7 +366,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get isOptional() {
-    return false
+    return false;
   }
 
   /**
@@ -376,7 +374,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get isAvailable() {
-    return true
+    return true;
   }
 
   /**
@@ -401,6 +399,18 @@ export default class ScoringSet extends Backbone.Controller {
 
   get isFailed() {
     return (this.isPassed === false);
+  }
+
+  /**
+   * Check to see if there are any child models
+   * @returns {boolean}
+   */
+  get isPopulated() {
+    return Boolean(this.models?.length);
+  }
+
+  get isNotPopulated() {
+    return (this.isPopulated === false);
   }
 
   /**
