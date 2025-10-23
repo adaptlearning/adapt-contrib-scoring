@@ -84,9 +84,10 @@ class Scoring extends Backbone.Controller {
    * @fires Adapt#scoring:update
    */
   update() {
-    const updateSubsets = !this._queuedChanges?.length
+    const queuedChanges = [...new Set(this._queuedChanges)];
+    const updateSubsets = !queuedChanges?.length
       ? this.subsets
-      : this._queuedChanges.reduce((updateSubsets, model) => updateSubsets.concat(getSubsetsByModelId(model?.get('_id'))), []);
+      : [...new Set(queuedChanges.reduce((subsets, model) => subsets.concat(getSubsetsByModelId(model?.get('_id'))), []))];
     updateSubsets.forEach(set => {
       const changedSubsetModels = filterIntersectingHierarchy(this._queuedChanges, set.rawModels);
       set.update(changedSubsetModels);

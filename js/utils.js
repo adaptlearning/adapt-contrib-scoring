@@ -132,7 +132,7 @@ export function getSubsetsByType(type, subsetParent = undefined) {
  */
 export function getSubsetsByModelId(id, subsetParent = undefined) {
   const models = [Data.findById(id)];
-  let sets = getRawSets(subsetParent).filter(set => hasIntersectingHierarchy(set.models, models));
+  let sets = getRawSets(subsetParent).filter(set => hasIntersectingHierarchy(set.rawModels, models));
   if (subsetParent) {
     // Create intersection sets between the found sets and the subsetParent
     sets = sets.map(set => createIntersectionSubset([subsetParent, set]));
@@ -187,6 +187,7 @@ export function getSubSetByPath(path, subsetParent = undefined) {
 export function getScaledScoreFromMinMax(score, minScore, maxScore) {
   // range split into negative/positive ranges (rather than min-max normalization) depending on score
   const range = (score < 0) ? Math.abs(minScore) : maxScore;
+  if (!range) return 0;
   return Math.round((score / range) * 100);
 }
 

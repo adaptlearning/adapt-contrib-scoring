@@ -47,8 +47,7 @@ export default class ScoringSet extends Backbone.Controller {
     this._isScoreIncluded = _isScoreIncluded;
     this._isCompletionRequired = _isCompletionRequired;
     this._modifiers = [];
-    // only register root sets as subsets are dynamically created when required
-    if (!this.subsetParent) this.register();
+    this.register();
     this._setupListeners();
   }
 
@@ -58,6 +57,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:register
    */
   register() {
+    if (this.subsetParent) return;
     Adapt.scoring.register(this);
     Adapt.trigger(`scoring:${this.type}:register scoring:set:register`, this);
   }
@@ -66,6 +66,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @protected
    */
   _setupListeners() {
+    if (this.subsetParent) return;
     if (OfflineStorage.ready) return this.restore();
     this.listenTo(Adapt, 'offlineStorage:ready', this.restore);
   }
@@ -77,6 +78,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:restored
    */
   restore() {
+    if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:restored scoring:set:restored`, this);
   }
 
@@ -108,6 +110,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:reset
    */
   reset() {
+    if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:reset scoring:set:reset`, this);
     Logging.debug(`${this.id} reset`);
     this._resetObjective();
@@ -253,24 +256,11 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
-   * Returns a unique array of models, filtered for `_isAvailable` and intersecting subsets hierarchies
-   * Always finish by calling `this.filterModels(models)`
+   * Returns all models regardless of `_isAvailable`
    * @returns {[Backbone.Model]}
    */
-  get models() {
-    Logging.error(`models must be overriden for ${this.constructor.name}`);
-  }
-
-  /**
-   * Check to see if there are any child models
-   * @returns {boolean}
-   */
-  get isPopulated() {
-    return Boolean(this.models?.length);
-  }
-
-  get isNotPopulated() {
-    return (this.isPopulated === false);
+  get rawModels() {
+    Logging.error(`rawModels must be overriden for ${this.constructor.name}`);
   }
 
   /**
@@ -278,7 +268,12 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {[ComponentModel]}
    */
   get rawComponents() {
-    return this.model.findDescendantModels('component');
+    return this.rawModels.reduce((components, model) => {
+      const models = model.isTypeGroup('component')
+        ? [model]
+        : model.findDescendantModels('component');
+      return components.concat(models);
+    }, []);
   }
 
   /**
@@ -286,7 +281,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {[QuestionModel]}
    */
   get rawQuestions() {
-    return this.model.findDescendantModels('question');
+    return this.rawComponents.filter(model => model.isTypeGroup('question'));
   }
 
   /**
@@ -298,14 +293,20 @@ export default class ScoringSet extends Backbone.Controller {
   }
 
   /**
+   * Returns a unique array of models, filtered for `_isAvailable` and intersecting subsets hierarchies
+   * Always finish by calling `this.filterModels(models)`
+   * @returns {[Backbone.Model]}
+   */
+  get models() {
+    return this.filterModels(this.rawModels);
+  }
+
+  /**
    * Returns all `_isAvailable` component models
    * @returns {[ComponentModel]}
    */
   get components() {
-    return this.models.reduce((components, model) => {
-      model.isTypeGroup('component') ? components.push(model) : components.push(...model.findDescendantModels('component'));
-      return components;
-    }, []).filter(isAvailableInHierarchy);
+    return this.rawComponents.filter(isAvailableInHierarchy);
   }
 
   /**
@@ -321,15 +322,15 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {[QuestionModel]}
    */
   get questions() {
-    return this.components.filter(model => model.isTypeGroup('question'));
+    return this.rawQuestions.filter(isAvailableInHierarchy);
   }
 
   /**
    * Returns all `_isAvailable` presentation component models
-   * @returns {[QuestionModel]}
+   * @returns {[ComponentModel]}
    */
   get presentationComponents() {
-    return this.components.filter(model => !model.isTypeGroup('question'));
+    return this.rawPresentationComponents.filter(isAvailableInHierarchy);
   }
 
   /**
@@ -403,7 +404,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get canReset() {
-    return false
+    return false;
   }
 
   /**
@@ -419,7 +420,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get isOptional() {
-    return false
+    return false;
   }
 
   /**
@@ -427,7 +428,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @returns {boolean}
    */
   get isAvailable() {
-    return true
+    return true;
   }
 
   /**
@@ -452,6 +453,18 @@ export default class ScoringSet extends Backbone.Controller {
 
   get isFailed() {
     return (this.isPassed === false);
+  }
+  
+  /**
+   * Check to see if there are any child models
+   * @returns {boolean}
+   */
+  get isPopulated() {
+    return Boolean(this.models?.length);
+  }
+
+  get isNotPopulated() {
+    return (this.isPopulated === false);
   }
 
   /**
@@ -590,6 +603,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:complete
    */
   onCompleted() {
+    if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:complete scoring:set:complete`, this);
     Logging.debug(`${this.id} completed`);
     this._completeObjective();
@@ -600,6 +614,7 @@ export default class ScoringSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:passed
    */
   onPassed() {
+    if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:passed scoring:set:passed`, this);
     Logging.debug(`${this.id} passed`);
   }
