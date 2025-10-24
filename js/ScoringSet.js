@@ -454,7 +454,7 @@ export default class ScoringSet extends Backbone.Controller {
   get isFailed() {
     return (this.isPassed === false);
   }
-  
+
   /**
    * Check to see if there are any child models
    * @returns {boolean}
@@ -518,19 +518,19 @@ export default class ScoringSet extends Backbone.Controller {
    * @param {Backbone.Model} model
    */
   _addAvailabilityModifiers(model) {
-    const questions = model.isTypeGroup('question')
-      ? [model]
-      : model.findDescendantModels('question');
+    const models = model.hasManagedChildren ? model.getChildren() : [model];
+    const questions = filterIntersectingHierarchy(this.rawQuestions, models);
     questions.forEach(questionModel => {
       const isAvailable = isAvailableInHierarchy(questionModel);
       const minScore = this.getMinScoreByModel(questionModel);
       const maxScore = this.getMaxScoreByModel(questionModel);
+      const score = this.getScoreByModel(questionModel);
       const data = {
         modelId: questionModel.get('_id'),
         minScore: isAvailable ? minScore : -minScore,
         maxScore: isAvailable ? maxScore : -maxScore
       };
-      if (questionModel.get('_isSubmitted')) data.score = -this.getScoreByModel(questionModel);
+      if (questionModel.get('_isSubmitted')) data.score = isAvailable ? score : -score;
       this.modifiers.push(data);
     });
   }
