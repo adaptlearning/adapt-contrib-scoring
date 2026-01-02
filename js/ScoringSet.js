@@ -112,7 +112,7 @@ export default class ScoringSet extends Backbone.Controller {
   reset() {
     if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:reset scoring:set:reset`, this);
-    Logging.debug(`${this.id} reset`);
+    Logging.info(`${this.id} reset`);
     this._resetObjective();
   }
 
@@ -554,7 +554,7 @@ export default class ScoringSet extends Backbone.Controller {
   _logUpdate() {
     if (!this.hasLogDataChanged) return;
     const logData = this.logData;
-    Logging.debug('scoring:update', JSON.stringify(logData));
+    Logging.info('scoring:update', JSON.stringify(logData));
     this._lastLogData = logData;
   }
 
@@ -605,7 +605,7 @@ export default class ScoringSet extends Backbone.Controller {
   onCompleted() {
     if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:complete scoring:set:complete`, this);
-    Logging.debug(`${this.id} completed`);
+    Logging.info(`${this.id} completed`);
     this._completeObjective();
   }
 
@@ -616,7 +616,7 @@ export default class ScoringSet extends Backbone.Controller {
   onPassed() {
     if (this.subsetParent) return;
     Adapt.trigger(`scoring:${this.type}:passed scoring:set:passed`, this);
-    Logging.debug(`${this.id} passed`);
+    Logging.info(`${this.id} passed`);
   }
 
 }
