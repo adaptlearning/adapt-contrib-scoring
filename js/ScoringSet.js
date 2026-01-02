@@ -7,6 +7,9 @@ import {
 import {
   sum
 } from './utils/math';
+import {
+  filterIntersectingHierarchy
+} from './utils/intersection';
 import Objective from './Objective';
 
 /**
@@ -54,6 +57,7 @@ export default class ScoringSet extends LifecycleSet {
     } = options;
     this.isScoreIncluded = _isScoreIncluded;
     this.isCompletionRequired = _isCompletionRequired;
+    this._modifiers = [];
   }
 
   /** @override */
@@ -228,12 +232,130 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
+   * Returns the list of modifiers which impacted the last update.
+   * @returns {Array}
+   */
+  get modifiers() {
+    return this._modifiers;
+  }
+
+  /**
+   * Returns the data to log.
+   * @returns {object}
+   */
+  get logData() {
+    const data = {
+      id: this.id,
+      type: this.type,
+      minScore: this.minScore,
+      maxScore: this.maxScore,
+      score: this.score,
+      scaledScore: this.scaledScore,
+      isComplete: this.isComplete,
+      isPassed: this.isPassed
+    };
+    if (this.modifiers.length) data.modifiers = this.modifiers;
+    return data;
+  }
+
+  /**
+   * Return whether the logData has changed since the last update.
+   * @returns {boolean}
+   */
+  get hasLogDataChanged() {
+    const lastData = this._lastLogData ?? {};
+    const currentData = this.logData;
+    return (
+      lastData.id !== currentData.id ||
+      lastData.type !== currentData.type ||
+      lastData.minScore !== currentData.minScore ||
+      lastData.maxScore !== currentData.maxScore ||
+      lastData.score !== currentData.score ||
+      lastData.scaledScore !== currentData.scaledScore ||
+      lastData.isComplete !== currentData.isComplete ||
+      lastData.isPassed !== currentData.isPassed
+    );
+  }
+
+  /**
    * The objective object for the set. See SCORM cmi.objectives.
    * @returns {Objective}
    */
   get objective() {
     if (this.isIntersectedSet) return;
     return (this._objective = this._objective || new Objective({ set: this }));
+  }
+
+  /**
+   * Add modifier details for how the set has been updated.
+   * @protected
+   * @param {Backbone.Model} model
+   */
+  _addModifiers(model) {
+    if (!this.hasLogDataChanged) return;
+    const isAvailabilityChange = Object.hasOwn(model.changed, '_isAvailable');
+    if (isAvailabilityChange) {
+      this._addAvailabilityModifiers(model);
+      return;
+    }
+    this._addCompletionModifiers(model);
+  }
+
+  /**
+   * Add modifier details for how the set has been updated by availability
+   * changes.
+   * @protected
+   * @param {Backbone.Model} model
+   */
+  _addAvailabilityModifiers(model) {
+    const models = model.hasManagedChildren ?
+      model.getChildren() :
+      [model];
+    const questions = filterIntersectingHierarchy(
+      this.allQuestions,
+      models
+    );
+    questions.forEach(questionModel => {
+      const isAvailable = questionModel.get('_isAvailable');
+      const minScore = questionModel.get('minScore') || 0;
+      const maxScore = questionModel.get('maxScore') || 0;
+      const score = questionModel.get('score') || 0;
+      const data = {
+        modelId: questionModel.get('_id'),
+        minScore: isAvailable ? minScore : -minScore,
+        maxScore: isAvailable ? maxScore : -maxScore
+      };
+      const isSubmitted = questionModel.get('_isSubmitted');
+      if (isSubmitted) {
+        data.score = isAvailable ? score : -score;
+      }
+      this.modifiers.push(data);
+    });
+  }
+
+  /**
+   * Add modifier details for how the set has been updated by completion
+   * changes.
+   * @protected
+   * @param {Backbone.Model} model
+   */
+  _addCompletionModifiers(model) {
+    const score = model.get('score') || 0;
+    this.modifiers.push({
+      modelId: model.get('_id'),
+      score
+    });
+  }
+
+  /**
+   * Log the data as JSON following an update.
+   * @protected
+   */
+  _logUpdate() {
+    if (!this.hasLogDataChanged) return;
+    const logData = this.logData;
+    Logging.info('scoring:update', JSON.stringify(logData));
+    this._lastLogData = logData;
   }
 
   /** @override */
@@ -252,7 +374,7 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /** @override */
-  async onUpdate() {
+  async onUpdate(updatedModels = []) {
     if (this.isIntersectedSet) return;
     const isComplete = this.isComplete;
     if (isComplete && !this._wasComplete) this.onCompleted();
@@ -260,7 +382,10 @@ export default class ScoringSet extends LifecycleSet {
     if (isPassed && !this._wasPassed) this.onPassed();
     this._wasComplete = isComplete;
     this._wasPassed = isPassed;
-    super.onUpdate();
+    updatedModels.forEach(model => this._addModifiers(model));
+    this._logUpdate();
+    this._modifiers = [];
+    super.onUpdate(updatedModels);
   }
 
   /**
@@ -270,8 +395,9 @@ export default class ScoringSet extends LifecycleSet {
    */
   async onCompleted() {
     if (this.isIntersectedSet) return;
-    Adapt.trigger(`scoring:${this.type}:complete scoring:set:complete`, this);
-    Logging.debug(`${this.id} completed`);
+    const events = `scoring:${this.type}:complete scoring:set:complete`;
+    Adapt.trigger(events, this);
+    Logging.info(`${this.id} completed`);
     this.objective?.complete();
   }
 
@@ -282,13 +408,15 @@ export default class ScoringSet extends LifecycleSet {
    */
   async onPassed() {
     if (this.isIntersectedSet) return;
-    Adapt.trigger(`scoring:${this.type}:passed scoring:set:passed`, this);
-    Logging.debug(`${this.id} passed`);
+    const events = `scoring:${this.type}:passed scoring:set:passed`;
+    Adapt.trigger(events, this);
+    Logging.info(`${this.id} passed`);
   }
 
   /** @override */
   async reset() {
     if (this.isIntersectedSet) return;
+    Logging.info(`${this.id} reset`);
     super.reset();
     this.objective?.reset();
   }
