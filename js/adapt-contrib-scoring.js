@@ -4,6 +4,7 @@ import Logging from 'core/js/logging';
 import AdaptModelSet from './AdaptModelSet';
 import Passmark from './Passmark';
 import {
+  filterIntersectingHierarchy,
   getSubsetById,
   getSubsetsByType,
   getSubsetsByModelId,
@@ -87,7 +88,10 @@ class Scoring extends Backbone.Controller {
     const updateSubsets = !queuedChanges?.length
       ? this.subsets
       : [...new Set(queuedChanges.reduce((subsets, model) => subsets.concat(getSubsetsByModelId(model?.get('_id'))), []))];
-    updateSubsets.forEach(set => set.update());
+    updateSubsets.forEach(set => {
+      const changedSubsetModels = filterIntersectingHierarchy(this._queuedChanges, set.rawModels);
+      set.update(changedSubsetModels);
+    });
     this._queuedChanges = [];
     if (!updateSubsets.length) return;
     const isComplete = this.isComplete;
