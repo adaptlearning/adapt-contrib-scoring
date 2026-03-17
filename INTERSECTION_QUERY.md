@@ -18,7 +18,7 @@ Adapt.scoring.getSubsetByPath(pathString)
 ```
 
 ### IntersectionSet
-All sets representing any a collection of models are likely to extend the most basic interface `IntersectionSet`. 
+All sets representing any collection of models are likely to extend the most basic interface `IntersectionSet`. 
 
 It is possible to use these literal attributes for queries on `IntersectionSet`:
 * `#setId` or `[id=setId]` or `[#setId]` the set with id `setId`, ids are unique
