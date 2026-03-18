@@ -216,10 +216,12 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send all sets into the reset phase.
+   * @fires Adapt#scoring:reset
    */
   async reset () {
     const sets = getAllSets();
     await this.renderer.render.reset(sets);
+    Adapt.trigger('scoring:reset', this.scoring);
   }
 
   /**
@@ -263,6 +265,7 @@ export default class Lifecycle extends Backbone.Controller {
   get renderer() {
     return renderer;
   }
+
 }
 
 const renderer = new LifecycleRenderer({

@@ -139,24 +139,22 @@ export class Scoring extends Backbone.Controller {
 
   /**
    * Force all registered sets to recalculate their states.
-   * @fires Adapt#scoring:update
+   * @fires Adapt#scoring:update via lifecycle
    */
   async update() {
     const sets = this.sets;
     if (!sets.length) return;
     await this.lifecycle.update(sets);
-    Adapt.trigger('scoring:update', this);
   }
 
   /**
    * Reset all subsets which can be reset.
-   * @fires Adapt#scoring:reset
+   * @fires Adapt#scoring:reset via lifecycle
    */
   async reset() {
     const sets = this.sets;
     if (!sets.length) return;
     await this.lifecycle.reset();
-    Adapt.trigger('scoring:reset', this);
   }
 
   /**
