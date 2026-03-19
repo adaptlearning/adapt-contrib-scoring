@@ -1,11 +1,11 @@
-import ScoringSet from './ScoringSet';
+import IntersectionSet from './IntersectionSet';
 import data from 'core/js/data';
 
 /**
  * A set which represents each AdaptModel from the `core/js/data` API.
  * Used for set intersection queries only, not for scoring.
  */
-export default class AdaptModelSet extends ScoringSet {
+export default class AdaptModelSet extends IntersectionSet {
 
   initialize(options = {}) {
     super.initialize({

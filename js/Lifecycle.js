@@ -13,7 +13,6 @@ import LifecycleRenderer from './LifecycleRenderer';
 import wait from 'core/js/wait';
 import AdaptModel from 'core/js/models/adaptModel';
 import Backbone from 'backbone';
-
 /** @typedef {import("../IntersectionSet").default} IntersectionSet */
 /** @typedef {import("core/js/modelEvent").default} ModelEvent */
 /** @typedef {import("core/js/location").default} Location */
@@ -126,7 +125,7 @@ export default class Lifecycle extends Backbone.Controller {
   async onAdaptModelChange(model) {
     if (!this._isStarted) return;
     const allSets = getAllSets();
-    this.update(filterSetsByIntersectingModelId(allSets, model.get('_id')));
+    this.update(filterSetsByIntersectingModelId(allSets, model.get('_id')), model);
   }
 
   /**
@@ -138,7 +137,7 @@ export default class Lifecycle extends Backbone.Controller {
     const adaptModel = event.deepPath.findLast(model => model instanceof AdaptModel);
     if (!adaptModel) return;
     const allSets = getAllSets();
-    this.update(filterSetsByIntersectingModelId(allSets, adaptModel.get('_id')));
+    this.update(filterSetsByIntersectingModelId(allSets, adaptModel.get('_id')), adaptModel);
   }
 
   /**
@@ -189,7 +188,7 @@ export default class Lifecycle extends Backbone.Controller {
   /**
    * Send all sets into the init phase.
    */
-  async init () {
+  async init() {
     const sets = getAllSets();
     await this.renderer.render.init(sets);
   }
@@ -198,7 +197,7 @@ export default class Lifecycle extends Backbone.Controller {
    * Send all sets into the restore phase.
    * @fires Adapt#scoring:restored
    */
-  async restore () {
+  async restore() {
     const sets = getAllSets();
     await this.renderer.render.restore(sets);
     Adapt.trigger('scoring:restored', this.scoring);
@@ -208,7 +207,7 @@ export default class Lifecycle extends Backbone.Controller {
    * Send all sets into the start phase.
    * @fires Adapt#scoring:start
    */
-  async start () {
+  async start() {
     const sets = getAllSets();
     await this.renderer.render.start(sets);
     Adapt.trigger('scoring:start', this.scoring);
@@ -218,7 +217,7 @@ export default class Lifecycle extends Backbone.Controller {
    * Send all sets into the reset phase.
    * @fires Adapt#scoring:reset
    */
-  async reset () {
+  async reset() {
     const sets = getAllSets();
     await this.renderer.render.reset(sets);
     Adapt.trigger('scoring:reset', this.scoring);
@@ -226,34 +225,40 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send givens sets into the restart phase.
+   * @param {InteractionSet[]} sets
    */
-  async restart (sets) {
+  async restart(sets) {
     sets = sets.filter(set => !set.intersectionParent);
     await this.renderer.render.restart(sets);
   }
 
   /**
    * Send givens sets into the leave phase.
+   * @param {InteractionSet[]} sets
    */
-  async leave (sets) {
+  async leave(sets) {
     sets = sets.filter(set => !set.intersectionParent);
     await this.renderer.render.leave(sets);
   }
 
   /**
    * Send givens sets into the visit phase.
+   * @param {InteractionSet[]} sets
    */
-  async visit (sets) {
+  async visit(sets) {
     sets = sets.filter(set => !set.intersectionParent);
     await this.renderer.render.visit(sets);
   }
 
   /**
    * Send givens sets into the update phase.
+   * @param {InteractionSet[]} sets
+   * @param {Backbone.Model} model
    * @fires Adapt#scoring:update
    */
-  async update (sets) {
+  async update(sets, model = null) {
     sets = sets.filter(set => !set.intersectionParent);
+    if (model) sets.forEach(set => set.addPendingUpdateModel?.(model));
     await this.renderer.render.update(sets);
     Adapt.trigger('scoring:update', this.scoring);
   }
