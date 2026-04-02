@@ -21,7 +21,8 @@ There are 8 external lifecycle phases, 6 set callback functions and 2 internal t
 | --- | --- |
 | onInit | Called after it is instantiated and registered, in the init phase |
 | onRestore | Called after onInit, in the restore phase, return true/false to signify restore |
-| onStart | Called after onRestore, if `wasRestored = false`. Called on the set after reset. |
+| onStart | Called after onRestore, if `wasRestored = false` |
+| onRestart | Called on the set after reset |
 | onLeave | Called when leaving their content object |
 | onVisit | Called when visiting their content object |
 | onUpdate | Called when any intersecting model changes across its `_isAvailable`, `_isInteractionComplete`, `_isActive` or `_isVisited` attributes or if any intersecting set calls `.update()`  |

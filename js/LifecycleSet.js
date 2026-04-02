@@ -34,12 +34,14 @@ export default class LifecycleSet extends IntersectionSet {
 
   /**
    * Called after initialize on every model.
+   * @protected
    */
   async onInit() {}
 
   /**
    * Called after init on every model.
    * Restore data from previous sessions.
+   * @protected
    * @fires Adapt#scoring:[set.type]:restored
    * @fires Adapt#scoring:set:restored
    * @returns {Boolean} Signify if the set was restored or not
@@ -51,17 +53,25 @@ export default class LifecycleSet extends IntersectionSet {
 
   /**
    * Called on each set after onRestore, only if onRestore returns false.
-   * Called on each set after a reset or intersecting set or model is reset.
+   * @protected
    */
   async onStart() {}
 
   /**
+   * Called on each set after a reset or intersecting set or model is reset.
+   * @protected
+   */
+  async onRestart() {}
+
+  /**
    * Called on each local set when its contentobject is visited.
+   * @protected
    */
   async onVisit() {}
 
   /**
    * Called on each local set when its contentobject is left.
+   * @protected
    */
   async onLeave() {}
 
@@ -69,6 +79,7 @@ export default class LifecycleSet extends IntersectionSet {
    * Called on each set when any intersecting model has changes to
    * _isAvailable, _isActive, _isVisited or _isInteractionComplete or
    * an intersecting set called `.update()`.
+   * @protected
    */
   async onUpdate() {}
 

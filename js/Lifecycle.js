@@ -294,9 +294,9 @@ const renderer = new LifecycleRenderer({
     async reset(set) {
       set.canReset && await set.reset?.();
     },
-    // restart calls set.onStart when any intersecting model or set is reset
+    // restart calls set.onRestart when any intersecting model or set is reset
     async restart(set) {
-      await set.onStart?.();
+      await set.onRestart?.();
     },
     // leave calls set.onLeave when exiting an intersecting contentobject
     async leave(set) {
