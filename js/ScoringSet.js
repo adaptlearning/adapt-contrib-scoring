@@ -215,7 +215,7 @@ export default class ScoringSet extends LifecycleSet {
    */
   get isPartlyCorrect() {
     if (!this.isSubmitted) return null;
-    return (this.correctness < this.maxCorrectness);
+    return this.correctness > 0 && this.correctness < this.maxCorrectness;
   }
 
   /**
@@ -225,7 +225,7 @@ export default class ScoringSet extends LifecycleSet {
    */
   get isIncorrect() {
     if (!this.isSubmitted) return null;
-    return (!this.correctness && this.maxCorrectness);
+    return this.correctness === 0;
   }
 
   /**
@@ -234,7 +234,7 @@ export default class ScoringSet extends LifecycleSet {
    * @returns {boolean}
    */
   get isSubmitted() {
-    return this.model.get('_isSubmitted');
+    return this.availableModels.every(model => model.get('_isSubmitted'));
   }
 
   /**
@@ -243,7 +243,7 @@ export default class ScoringSet extends LifecycleSet {
    * @returns {boolean}
    */
   get isComplete() {
-    return this.model.get('_isComplete');
+    return this.availableModels.every(model => model.get('_isComplete'));
   }
 
   /**
@@ -252,7 +252,7 @@ export default class ScoringSet extends LifecycleSet {
    * @returns {boolean}
    */
   get isIncomplete() {
-    return (this.isComplete === false);
+    return this.isComplete === false;
   }
 
   /**
@@ -261,7 +261,7 @@ export default class ScoringSet extends LifecycleSet {
    * @returns {boolean}
    */
   get isPassed() {
-    Logging.error(`isPassed must be overridden for ${this.constructor.name}`);
+    return this.isComplete;
   }
 
   /**

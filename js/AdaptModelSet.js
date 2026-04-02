@@ -1,11 +1,11 @@
-import IntersectionSet from './IntersectionSet';
+import ScoringSet from './ScoringSet';
 import data from 'core/js/data';
 
 /**
  * A set which represents each AdaptModel from the `core/js/data` API.
  * Used for set intersection queries only, not for scoring.
  */
-export default class AdaptModelSet extends IntersectionSet {
+export default class AdaptModelSet extends ScoringSet {
 
   initialize(options = {}) {
     super.initialize({
@@ -52,38 +52,22 @@ export default class AdaptModelSet extends IntersectionSet {
     return 100 - this.model.getAncestorModels(true).length;
   }
 
-  /**
-   * Returns whether the set is passed.
-   * query example: `(isPassed)` alias for `(isComplete)`
-   * @returns {boolean}
-   */
-  get isPassed() {
-    return this.isComplete;
+  /** @override */
+  get isSubmitted() {
+    return this.model.get('_isSubmitted');
   }
 
-  /**
-   * Returns whether the set is isFailed.
-   * query example: `(isFailed)`
-   * @returns {boolean}
-   */
+  /** @override */
   get isFailed() {
     return false;
   }
 
-  /**
-   * Returns whether the set is optional.
-   * query example: `(isOptional)`
-   * @returns {boolean}
-   */
+  /** @override */
   get isOptional() {
     return this.model.get('_isOptional');
   }
 
-  /**
-   * Returns whether the set is available.
-   * query example: `(isAvailable)`
-   * @returns {boolean}
-   */
+  /** @override */
   get isAvailable() {
     return this.model.get('_isAvailable');
   }
@@ -91,6 +75,17 @@ export default class AdaptModelSet extends IntersectionSet {
   get feedback() {
     if (!this.isSubmitted) return;
     return this.model.getFeedback();
+  }
+
+  /** @override */
+  get objective() {
+    if (!this.model.get('_recordObjective')) return;
+    return super.objective;
+  }
+
+  /** @override */
+  _logUpdate() {
+
   }
 
 }
