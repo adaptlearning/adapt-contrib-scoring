@@ -20,33 +20,65 @@ export default class Objective {
 
   /**
    * Define the objective for reporting purposes.
+   * Set initial status.
    */
-  init() {
-    const completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
+  register() {
     offlineStorage.set('objectiveDescription', this.id, this.description);
-    if (this.set.isComplete) return;
-    offlineStorage.set('objectiveStatus', this.id, completionStatus);
+    this.setStatus();
   }
 
   /**
-   * Reset the objective data.
+   * Set the objective score.
    */
-  reset() {
-    if (this.set.isComplete) return;
-    const completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
+  setScore() {
     offlineStorage.set('objectiveScore', this.id, this.set.score, this.set.minScore, this.set.maxScore);
-    offlineStorage.set('objectiveStatus', this.id, completionStatus);
   }
 
   /**
-   * Complete the objective.
-   * TODO: Always updates to latest data - is this desired?
+   * Reset the objective score.
+   * Depending on the set logic, this may be overriden to prevent resets.
    */
-  complete() {
-    const completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
-    const successStatus = (this.set.isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
-    offlineStorage.set('objectiveScore', this.id, this.set.score, this.set.minScore, this.set.maxScore);
+  resetScore() {
+    this.setScore();
+  }
+
+  /**
+   * Set the appropriate objective completion and success status.
+   * Will update to the latest data/attempt, unless overriden accordingly in a set.
+   */
+  setStatus() {
+    const isAvailable = this.set.isAvailable;
+    const isStarted = this.set.isStarted;
+    const isIncomplete = this.set.isIncomplete;
+    const isComplete = this.isComplete;
+    const isPassed = this.isPassed;
+    let completionStatus = COMPLETION_STATE.UNKNOWN.asLowerCase;
+    let successStatus = COMPLETION_STATE.UNKNOWN.asLowerCase;
+    if (isAvailable && !isStarted) completionStatus = COMPLETION_STATE.NOTATTEMPTED.asLowerCase;
+    if (isAvailable && isStarted && isIncomplete) completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
+    if (isAvailable && isComplete) {
+      completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
+      if (this.set.passmark?.isEnabled) successStatus = (isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
+    }
     offlineStorage.set('objectiveStatus', this.id, completionStatus, successStatus);
+  }
+
+  /**
+   * Returns whether the objective for the set is completed.
+   * Depending on the set logic, this can differ to set completion.
+   * @returns {boolean}
+   */
+  get isComplete() {
+    return this.set.isComplete;
+  }
+
+  /**
+   * Returns whether the objective for the set is passed.
+   * Depending on the set logic, this can differ to whether the set was passed.
+   * @returns {boolean}
+   */
+  get isPassed() {
+    return this.set.isPassed;
   }
 
 }

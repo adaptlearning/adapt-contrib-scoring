@@ -12,6 +12,9 @@ import {
   filterModelsByIntersectingModels,
   isModelAvailableInHierarchy
 } from './utils/models';
+import {
+  hasHashChanged
+} from './utils/hash';
 import _ from 'underscore';
 
 /**
@@ -238,6 +241,15 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
+   * Returns whether the set is started.
+   * query example: `(isStarted)` or `(isStarted=false)`
+   * @returns {boolean}
+   */
+  get isStarted() {
+    return this.availableModels.some(model => model.get('_isVisited'));
+  }
+
+  /**
    * Returns whether the set is completed.
    * query example: `(isComplete)` or `(isComplete=false)`
    * @returns {boolean}
@@ -322,6 +334,26 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
+   * Update the current status hashes to help determine what has changed during the update phase of the lifecycle.
+   * @protected
+   */
+  _setStatusHash() {
+    const isAvailable = this.isAvailable;
+    const isComplete = this.isComplete;
+    const isPassed = this.isPassed;
+    this._isAvailableChange = hasHashChanged(this, [isAvailable], '_isAvailableHash');
+    this._isCompleteChange = hasHashChanged(this, [isComplete], '_isCompleteHash');
+    this._isPassedChange = hasHashChanged(this, [isPassed], '_isPassedHash');
+    this._isStatusChange = hasHashChanged(this, [
+      isAvailable,
+      this.isStarted,
+      this.isIncomplete,
+      isComplete,
+      isPassed
+    ], '_statusHash');
+  }
+
+  /**
    * Add a model as having triggered this set's next update.
    * @param {Backbone.Model} model
    */
@@ -394,32 +426,39 @@ export default class ScoringSet extends LifecycleSet {
   /** @override */
   async onInit() {
     if (this.isIntersectedSet) return;
-    this.objective?.init();
-    super.onInit();
+    if (this.type !== 'adapt') {
+      this.listenTo(Adapt, 'questionView:submitted', this.onQuestionSubmitted);
+    }
+    await super.onInit();
   }
 
   /** @override */
   async onRestore() {
     if (this.isIntersectedSet) return;
-    this._wasComplete = this.isComplete;
-    this._wasPassed = this.isPassed;
+    this._setStatusHash();
+    if (!this.isStarted) this.objective?.register();
     super.onRestore();
+  }
+
+  /** @override */
+  async onRestart() {
+    if (this.isIntersectedSet) return;
+    this.objective?.resetScore();
+    super.onRestart();
   }
 
   /** @override */
   async onUpdate() {
     if (this.isIntersectedSet) return;
-    const isComplete = this.isComplete;
-    if (isComplete && !this._wasComplete) await this.onCompleted();
-    const isPassed = this.isPassed;
-    if (isPassed && !this._wasPassed) await this.onPassed();
-    this._wasComplete = isComplete;
-    this._wasPassed = isPassed;
+    this._setStatusHash();
+    if (this.isComplete && this._isCompleteChange && !this._isAvailableChange) await this.onCompleted();
+    if (this.isPassed && this._isPassedChange && !this._isAvailableChange) await this.onPassed();
+    if (this._isStatusChange) this.objective?.setStatus();
     this._pendingUpdateModels.forEach(model => this._addUpdateModifiers(model));
     this._logUpdate();
     this._pendingUpdateModels = [];
     this._pendingUpdateModifiers = [];
-    super.onUpdate();
+    await super.onUpdate();
   }
 
   /**
@@ -432,7 +471,7 @@ export default class ScoringSet extends LifecycleSet {
     const events = `scoring:${this.type}:complete scoring:set:complete`;
     Adapt.trigger(events, this);
     Logging.info(`${this.id} completed`);
-    this.objective?.complete();
+    this.objective?.setScore();
   }
 
   /**
@@ -447,12 +486,14 @@ export default class ScoringSet extends LifecycleSet {
     Logging.info(`${this.id} passed`);
   }
 
-  /** @override */
-  async reset() {
-    if (this.isIntersectedSet) return;
-    Logging.info(`${this.id} reset`);
-    super.reset();
-    this.objective?.reset();
+  /**
+   * @param {QuestionView} view
+   * @listens Adapt#questionView:submitted
+   */
+  onQuestionSubmitted(view) {
+    const model = view.model;
+    if (!this.availableQuestions.includes(model)) return;
+    model.addContextActivity(this.id, this.type, this.title);
   }
 
 }
