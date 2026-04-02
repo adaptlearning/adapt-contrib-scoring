@@ -2,7 +2,6 @@ import Adapt from 'core/js/adapt';
 import {
   findSetById
 } from './utils/sets';
-
 /** @typedef {import("./adapt-contrib-scoring").Scoring} Scoring */
 
 // Compatibility layer for adapt-contrib-assessment components and extensions

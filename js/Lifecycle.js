@@ -13,7 +13,7 @@ import LifecycleRenderer from './LifecycleRenderer';
 import wait from 'core/js/wait';
 import AdaptModel from 'core/js/models/adaptModel';
 import Backbone from 'backbone';
-/** @typedef {import("../IntersectionSet").default} IntersectionSet */
+/** @typedef {import("./IntersectionSet").default} IntersectionSet */
 /** @typedef {import("core/js/modelEvent").default} ModelEvent */
 /** @typedef {import("core/js/location").default} Location */
 

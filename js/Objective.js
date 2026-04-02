@@ -1,7 +1,6 @@
 import offlineStorage from 'core/js/offlineStorage';
 import COMPLETION_STATE from 'core/js/enums/completionStateEnum';
-
-/** @typedef {import("../IntersectionSet").default} IntersectionSet */
+/** @typedef {import("./ScoringSet").default} ScoringSet */
 
 /**
  * Registers an objective with the offlineStorage API.
@@ -11,7 +10,7 @@ export default class Objective {
 
   /**
    * @param {Object} options
-   * @param {IntersectionSet} options.set
+   * @param {ScoringSet} options.set
    */
   constructor({ set } = {}) {
     this.set = set;

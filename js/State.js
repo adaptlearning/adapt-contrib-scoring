@@ -1,6 +1,5 @@
 import OfflineStorage from 'core/js/offlineStorage';
-
-/** @typedef {import("../LifecycleSet").default} LifecycleSet */
+/** @typedef {import("./LifecycleSet").default} LifecycleSet */
 
 /**
  * Saves and restores state by { name: { id: 'data' } } in the offlineStorage API.

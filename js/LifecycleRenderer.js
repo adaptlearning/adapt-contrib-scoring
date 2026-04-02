@@ -2,8 +2,7 @@ import wait from 'core/js/wait';
 import Backbone from 'backbone';
 // eslint-disable-next-line no-unused-vars
 import Logging from 'core/js/logging';
-
-/** @typedef {import("../IntersectionSet").default} IntersectionSet */
+/** @typedef {import("./IntersectionSet").default} IntersectionSet */
 
 /**
  * Transforms a lifecycle definition into fps batched, phase queues, where the

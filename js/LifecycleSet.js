@@ -21,7 +21,7 @@ export default class LifecycleSet extends IntersectionSet {
   }
 
   /**
-   * Signifies if onRestored returned true/false.
+   * Signifies if onRestore returned true/false.
    * @returns {boolean}
    */
   get wasRestored() {

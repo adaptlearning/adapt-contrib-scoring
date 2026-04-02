@@ -77,8 +77,6 @@ export default class IntersectionSet extends Backbone.Controller {
     this.title = _title ?? title;
     (_model ?? model) && (this.model = _model ?? model);
     (_models ?? models) && (this.models = _models ?? models);
-    // Do not register intersected sets
-    if (this.isIntersectedSet) return;
     this.register();
   }
 
@@ -422,4 +420,5 @@ export default class IntersectionSet extends Backbone.Controller {
     sets = sets.map(set => createIntersectedSet([this, set]));
     return sets;
   }
+
 }
