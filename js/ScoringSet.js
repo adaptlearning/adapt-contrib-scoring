@@ -2,6 +2,7 @@ import Adapt from 'core/js/adapt';
 import Logging from 'core/js/logging';
 import LifecycleSet from './LifecycleSet';
 import Objective from './Objective';
+import Journal from './Journal';
 import {
   getScaledScoreFromMinMax
 } from './utils/scoring';
@@ -9,13 +10,8 @@ import {
   sum
 } from './utils/math';
 import {
-  filterModelsByIntersectingModels,
-  isModelAvailableInHierarchy
-} from './utils/models';
-import {
   hasHashChanged
 } from './utils/hash';
-import _ from 'underscore';
 
 /**
  * The class provides an abstract that describes a set of models which can be extended with custom
@@ -62,48 +58,7 @@ export default class ScoringSet extends LifecycleSet {
     } = options;
     this.isScoreIncluded = _isScoreIncluded;
     this.isCompletionRequired = _isCompletionRequired;
-    this._pendingUpdateModels = [];
-    this._pendingUpdateModifiers = [];
-  }
-
-  /**
-   * Returns the minimum score for the specified model
-   * @param {Backbone.Model} model
-   * @returns {number}
-   */
-  getMinScoreByModel(model) {
-    if (!this.questions.includes(model)) return 0;
-    return model.minScore;
-  }
-
-  /**
-   * Returns the maxiumum score for the specified model
-   * @param {Backbone.Model} model
-   * @returns {number}
-   */
-  getMaxScoreByModel(model) {
-    if (!this.questions.includes(model)) return 0;
-    return model.maxScore;
-  }
-
-  /**
-   * Returns the score for the specified model
-   * @param {Backbone.Model} model
-   * @returns {number}
-   */
-  getScoreByModel(model) {
-    if (!this.questions.includes(model)) return 0;
-    return model.score;
-  }
-
-  /**
-   * Returns a percentage score for the specified model - relative to a positive minimum or zero and maximum values
-   * @param {Backbone.Model} model
-   * @returns {number}
-   */
-  getScaledScoreByModel(model) {
-    if (!this.questions.includes(model)) return 0;
-    return getScaledScoreFromMinMax(this.getScoreByModel(model), this.getMinScoreByModel(model), this.getMaxScoreByModel(model));
+    this._pendingUpdateModels = new Set();
   }
 
   /** @override */
@@ -287,41 +242,12 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns the list of modifiers which impacted the last update.
-   * @returns {Array}
+   * The journal for recording the updates to the set.
+   * @returns {Journal}
    */
-  get pendingUpdateModifiers() {
-    return this._pendingUpdateModifiers;
-  }
-
-  /**
-   * Returns the data to log.
-   * @returns {object}
-   */
-  get logData() {
-    const data = {
-      id: this.id,
-      type: this.type,
-      minScore: this.minScore,
-      maxScore: this.maxScore,
-      score: this.score,
-      scaledScore: this.scaledScore,
-      isComplete: this.isComplete,
-      isPassed: this.isPassed
-    };
-    if (this.pendingUpdateModifiers.length) data.modifiers = this.pendingUpdateModifiers;
-    return data;
-  }
-
-  /**
-   * Return whether the logData has changed since the last update.
-   * @returns {boolean}
-   */
-  get hasLogDataChanged() {
-    // delete previous modifiers entry before comparing logs for changes
-    const clonedLastLogData = structuredClone(this._lastLogData ?? {});
-    delete clonedLastLogData.modifiers;
-    return !(_.isEqual(clonedLastLogData, this.logData));
+  get journal() {
+    if (this.isIntersectedSet) return;
+    return (this._journal = this._journal || new Journal({ set: this }));
   }
 
   /**
@@ -358,69 +284,7 @@ export default class ScoringSet extends LifecycleSet {
    * @param {Backbone.Model} model
    */
   addPendingUpdateModel(model) {
-    if (this._pendingUpdateModels.includes(model)) return;
-    this._pendingUpdateModels.push(model);
-  }
-
-  /**
-   * Add modifier details for how the set has been updated.
-   * @protected
-   * @param {Backbone.Model} model
-   */
-  _addUpdateModifiers(model) {
-    if (!this.hasLogDataChanged) return;
-    const isAvailabilityChange = Object.hasOwn(model.changed, '_isAvailable');
-    if (isAvailabilityChange) {
-      this._addAvailabilityModifiers(model);
-      return;
-    }
-    this._addCompletionModifiers(model);
-  }
-
-  /**
-   * Add modifier details for how the set has been updated by availability changes.
-   * @protected
-   * @param {Backbone.Model} model
-   */
-  _addAvailabilityModifiers(model) {
-    const models = model.hasManagedChildren ? model.getChildren() : [model];
-    const questions = filterModelsByIntersectingModels(this.questions, models);
-    questions.forEach(questionModel => {
-      const isAvailable = isModelAvailableInHierarchy(questionModel);
-      const minScore = this.getMinScoreByModel(questionModel);
-      const maxScore = this.getMaxScoreByModel(questionModel);
-      const score = this.getScoreByModel(questionModel);
-      const data = {
-        modelId: questionModel.get('_id'),
-        minScore: isAvailable ? minScore : -minScore,
-        maxScore: isAvailable ? maxScore : -maxScore
-      };
-      if (questionModel.get('_isSubmitted')) data.score = isAvailable ? score : -score;
-      this.pendingUpdateModifiers.push(data);
-    });
-  }
-
-  /**
-   * Add modifier details for how the set has been updated by completion changes.
-   * @protected
-   * @param {Backbone.Model} model
-   */
-  _addCompletionModifiers(model) {
-    this.pendingUpdateModifiers.push({
-      modelId: model.get('_id'),
-      score: this.getScoreByModel(model)
-    });
-  }
-
-  /**
-   * Log the data as JSON following an update.
-   * @protected
-   */
-  _logUpdate() {
-    if (!this.hasLogDataChanged) return;
-    const logData = this.logData;
-    Logging.info('scoring:update', JSON.stringify(logData));
-    this._lastLogData = logData;
+    this._pendingUpdateModels.add(model);
   }
 
   /** @override */
@@ -454,10 +318,8 @@ export default class ScoringSet extends LifecycleSet {
     if (this.isComplete && this._isCompleteChange && !this._isAvailableChange) await this.onCompleted();
     if (this.isPassed && this._isPassedChange && !this._isAvailableChange) await this.onPassed();
     if (this._isStatusChange) this.objective?.setStatus();
-    this._pendingUpdateModels.forEach(model => this._addUpdateModifiers(model));
-    this._logUpdate();
-    this._pendingUpdateModels = [];
-    this._pendingUpdateModifiers = [];
+    this.journal?.update(this._pendingUpdateModels);
+    this._pendingUpdateModels.clear();
     await super.onUpdate();
   }
 

@@ -78,14 +78,14 @@ export default class AdaptModelSet extends ScoringSet {
   }
 
   /** @override */
-  get objective() {
-    if (!this.model.get('_recordObjective')) return;
-    return super.objective;
+  get journal() {
+    // intentionally empty to prevent logging
   }
 
   /** @override */
-  _logUpdate() {
-
+  get objective() {
+    if (!this.model.get('_recordObjective')) return;
+    return super.objective;
   }
 
 }
