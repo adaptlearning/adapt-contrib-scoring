@@ -18,15 +18,18 @@ export default class LifecycleUpdateJournal {
   constructor({ set } = {}) {
     this.set = set;
     this._pendingUpdateModels = new Set();
+    this._pendingUpdateSets = new Set();
     this._pendingUpdateModifiers = [];
   }
 
   /**
-   * Add the model as having triggered this set's next update.
+   * Add the model and intersected sets having triggered this set's next update.
    * @param {Backbone.Model} model
+   * @param {ScoringSet[]} [sets]
    */
-  addPendingUpdateModel(model) {
+  addPendingUpdate(model, sets) {
     this._pendingUpdateModels.add(model);
+    sets?.forEach(set => this._pendingUpdateSets.add(set));
   }
 
   /**
@@ -36,6 +39,7 @@ export default class LifecycleUpdateJournal {
     this._pendingUpdateModels.forEach(model => this._addUpdateModifiers(model));
     this._write();
     this._pendingUpdateModels.clear();
+    this._pendingUpdateSets.clear();
     this._pendingUpdateModifiers = [];
   }
 

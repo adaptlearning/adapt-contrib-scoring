@@ -74,7 +74,7 @@ export default class AdaptModelSet extends ScoringSet {
 
   /** @override */
   get journal() {
-    // intentionally empty to prevent logging
+    return null;
   }
 
   /** @override */

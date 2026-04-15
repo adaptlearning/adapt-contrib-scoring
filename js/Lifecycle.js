@@ -258,7 +258,7 @@ export default class Lifecycle extends Backbone.Controller {
    */
   async update(sets, model = null) {
     sets = sets.filter(set => !set.intersectionParent);
-    if (model) sets.forEach(set => set?.journal?.addPendingUpdateModel?.(model));
+    if (model) sets.forEach(set => set?.journal?.addPendingUpdate?.(model, sets));
     await this.renderer.render.update(sets);
     Adapt.trigger('scoring:lifecycle:update', this.scoring);
   }
