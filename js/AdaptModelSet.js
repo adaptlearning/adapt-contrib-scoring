@@ -53,11 +53,6 @@ export default class AdaptModelSet extends ScoringSet {
   }
 
   /** @override */
-  get isSubmitted() {
-    return this.model.get('_isSubmitted');
-  }
-
-  /** @override */
   get isFailed() {
     return false;
   }

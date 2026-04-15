@@ -192,7 +192,8 @@ export default class ScoringSet extends LifecycleSet {
    * @returns {boolean}
    */
   get isSubmitted() {
-    return this.availableModels.every(model => model.get('_isSubmitted'));
+    const availableQuestions = this.availableQuestions;
+    return availableQuestions.length > 0 && availableQuestions.every(model => model.get('_isSubmitted'));
   }
 
   /**
@@ -301,14 +302,14 @@ export default class ScoringSet extends LifecycleSet {
     if (this.isIntersectedSet) return;
     this._setStatusHash();
     if (!this.isStarted) this.objective?.register();
-    super.onRestore();
+    await super.onRestore();
   }
 
   /** @override */
   async onRestart() {
     if (this.isIntersectedSet) return;
     this.objective?.resetScore();
-    super.onRestart();
+    await super.onRestart();
   }
 
   /** @override */

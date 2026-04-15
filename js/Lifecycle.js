@@ -200,7 +200,7 @@ export default class Lifecycle extends Backbone.Controller {
   async restore() {
     const sets = getAllSets();
     await this.renderer.render.restore(sets);
-    Adapt.trigger('scoring:restored', this.scoring);
+    Adapt.trigger('scoring:lifecycle:restored', this.scoring);
   }
 
   /**
@@ -210,7 +210,7 @@ export default class Lifecycle extends Backbone.Controller {
   async start() {
     const sets = getAllSets();
     await this.renderer.render.start(sets);
-    Adapt.trigger('scoring:start', this.scoring);
+    Adapt.trigger('scoring:lifecycle:start', this.scoring);
   }
 
   /**
@@ -220,7 +220,7 @@ export default class Lifecycle extends Backbone.Controller {
   async reset() {
     const sets = getAllSets();
     await this.renderer.render.reset(sets);
-    Adapt.trigger('scoring:reset', this.scoring);
+    Adapt.trigger('scoring:lifecycle:reset', this.scoring);
   }
 
   /**
@@ -260,7 +260,7 @@ export default class Lifecycle extends Backbone.Controller {
     sets = sets.filter(set => !set.intersectionParent);
     if (model) sets.forEach(set => set.addPendingUpdateModel?.(model));
     await this.renderer.render.update(sets);
-    Adapt.trigger('scoring:update', this.scoring);
+    Adapt.trigger('scoring:lifecycle:update', this.scoring);
   }
 
   /**

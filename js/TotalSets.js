@@ -1,10 +1,6 @@
 import Adapt from 'core/js/adapt';
 import Passmark from './Passmark';
-import Logging from 'core/js/logging';
 import ScoringSet from './ScoringSet';
-import {
-  getScaledScoreFromMinMax
-} from './utils/scoring';
 import {
   createIntersectedSet
 } from './utils/intersection';
@@ -43,12 +39,16 @@ export default class TotalSets extends ScoringSet {
       _isCompletionRequired: false
     });
     this._passmark = new Passmark(this._config?._passmark);
-    this._wasComplete = false;
-    this._wasPassed = false;
+  }
+
+  /** @override */
+  get order() {
+    return 600;
   }
 
   /**
    * Returns all models from sets marked with `_isScoreIncluded` or `_isCompletionRequired`, filtered and intersected where appropriate.
+   * @override
    * @returns {Backbone.Model[]}
    */
   get models() {
@@ -89,6 +89,7 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns the minimum score of all `_isScoreIncluded` subsets.
+   * @override
    * @returns {number}
    */
   get minScore() {
@@ -97,6 +98,7 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns the maximum score of all `_isScoreIncluded` subsets.
+   * @override
    * @returns {number}
    */
   get maxScore() {
@@ -105,6 +107,7 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns the score of all `_isScoreIncluded` subsets.
+   * @override
    * @returns {number}
    */
   get score() {
@@ -112,15 +115,8 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns a percentage score relative to a positive minimum or zero and maximum values.
-   * @returns {number}
-   */
-  get scaledScore() {
-    return getScaledScoreFromMinMax(this.score, this.minScore, this.maxScore);
-  }
-
-  /**
    * Returns the number of correctly answered available questions.
+   * @override
    * @returns {number}
    */
   get correctness() {
@@ -129,18 +125,11 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns the number of available questions.
+   * @override
    * @returns {number}
    */
   get maxCorrectness() {
     return sum(this.scoringSets, 'maxCorrectness');
-  }
-
-  /**
-   * Returns the percentage of correctly answered questions.
-   * @returns {number}
-   */
-  get scaledCorrectness() {
-    return getScaledScoreFromMinMax(this.correctness, 0, this.maxCorrectness);
   }
 
   /**
@@ -153,19 +142,17 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns whether all root sets marked with `_isCompletionRequired` are completed.
+   * @override
    * @returns {boolean}
    */
   get isComplete() {
     return this.completionSets.every(set => set.isComplete);
   }
 
-  get isIncomplete() {
-    return (this.isComplete === false);
-  }
-
   /**
    * Returns whether the configured passmark has been achieved for `_isScoreIncluded` sets.
    * If _passmark._requiresPassedSubsets then all scoring subsets have to be passed.
+   * @override
    * @returns {boolean}
    */
   get isPassed() {
@@ -181,6 +168,7 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns whether any root sets marked with `_isScoreIncluded` are failed and cannot be reset.
+   * @override
    * @todo Add `canReset` to `ScoringSet`?
    * @returns {boolean}
    */
@@ -190,42 +178,11 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns whether any root sets marked with `_isScoreIncluded` can be reset.
+   * @override
    * @returns {boolean}
    */
   get canReset() {
     return this.scoringSets.some(set => set?.canReset);
-  }
-
-  /** @override */
-  onRestore() {
-    if (this.isIntersectedSet) return;
-    this._wasComplete = this.isComplete;
-    this._wasPassed = this.isPassed;
-  }
-
-  /** @override */
-  onUpdate() {
-    if (this.isIntersectedSet) return;
-    const isComplete = this.isComplete;
-    if (isComplete && !this._wasComplete) this.onCompleted();
-    const isPassed = this.isPassed;
-    if (isPassed && !this._wasPassed) this.onPassed();
-    this._wasComplete = isComplete;
-    this._wasPassed = isPassed;
-  }
-
-  /** @override */
-  onCompleted() {
-    if (this.isIntersectedSet) return;
-    Adapt.trigger('scoring:complete', Adapt.scoring);
-    Logging.debug('scoring completed');
-  }
-
-  /** @override */
-  onPassed() {
-    if (this.isIntersectedSet) return;
-    Adapt.trigger('scoring:pass', Adapt.scoring);
-    Logging.debug('scoring passed');
   }
 
 }

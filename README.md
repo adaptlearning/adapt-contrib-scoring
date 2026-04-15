@@ -8,6 +8,8 @@ A scoring set consists of a collection of models from which scores (`minScore`, 
 
 Each plugin will register a new set type with the Scoring API, and identify its associations with other models, along with any extended functionality specific to that plugin. This will allow sets to be evaluated for any intersections within the course structure by comparing overlapping hierarchies. Scoring sets allow multiple scores to be categorised as required, providing the ability to evaluate user performance across different areas.
 
+A `TotalSets` scoring set is used to represent all sets contributing to the scoring and completion of the course scoring objective.
+
 ### Attributes
 
 Scoring sets should be modular in the JSON configuration, with each set added as its own object. Each scoring set requires the following base attributes for configuration:
@@ -16,9 +18,9 @@ Scoring sets should be modular in the JSON configuration, with each set added as
 
 **title** (string): A title for the set. Not required, but exposed should it be used for reporting purposes.
 
-**_isScoreIncluded** (boolean): Determines whether the set should be included in the overall score.
+**_isScoreIncluded** (boolean): Determines whether the set should be included in `TotalSets`, contributing to the overall score.
 
-**_isCompletionRequired** (boolean): Determines whether the set should be included in the completion checks.
+**_isCompletionRequired** (boolean): Determines whether the set should be included in `TotalSets` and evaluated when checking completion.
 
 ### Events
 
@@ -28,6 +30,8 @@ The following events are triggered for each scoring set:
 **Adapt#scoring:set:register**<br>
 **Adapt#scoring:[set.type]:restored**<br>
 **Adapt#scoring:set:restored**<br>
+**Adapt#scoring:[set.type]:update**<br>
+**Adapt#scoring:set:update**<br>
 **Adapt#scoring:[set.type]:complete**<br>
 **Adapt#scoring:set:complete**<br>
 **Adapt#scoring:[set.type]:passed**<br>
@@ -68,13 +72,21 @@ The attributes listed below are used in *course.json* to configure the overall s
 
 ## Events
 
-The following events are triggered:
+The following [lifecycle](LIFECYCLE.md) events are triggered:
 
-**Adapt#scoring:update**<br>
-**Adapt#scoring:reset**<br>
-**Adapt#scoring:restored**<br>
-**Adapt#scoring:complete**<br>
-**Adapt#scoring:pass**
+**Adapt#scoring:lifecycle:restored**<br>
+**Adapt#scoring:lifecycle:start**<br>
+**Adapt#scoring:lifecycle:update**<br>
+**Adapt#scoring:lifecycle:reset**
+
+For overall scoring and completion, the events triggered by `TotalSets` should be utilised:
+
+**Adapt#scoring:total:register**<br>
+**Adapt#scoring:total:restored**<br>
+**Adapt#scoring:total:update**<br>
+**Adapt#scoring:total:complete**<br>
+**Adapt#scoring:total:passed**<br>
+**Adapt#scoring:total:reset**
 
 For backward compatibility the following events are triggered if `"_isBackwardCompatible": true`:
 
