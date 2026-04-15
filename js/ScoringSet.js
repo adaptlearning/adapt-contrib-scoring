@@ -2,7 +2,7 @@ import Adapt from 'core/js/adapt';
 import Logging from 'core/js/logging';
 import LifecycleSet from './LifecycleSet';
 import Objective from './Objective';
-import Journal from './Journal';
+import LifecycleUpdateJournal from './LifecycleUpdateJournal';
 import {
   getScaledScoreFromMinMax
 } from './utils/scoring';
@@ -58,7 +58,6 @@ export default class ScoringSet extends LifecycleSet {
     } = options;
     this.isScoreIncluded = _isScoreIncluded;
     this.isCompletionRequired = _isCompletionRequired;
-    this._pendingUpdateModels = new Set();
   }
 
   /** @override */
@@ -244,11 +243,11 @@ export default class ScoringSet extends LifecycleSet {
 
   /**
    * The journal for recording the updates to the set.
-   * @returns {Journal}
+   * @returns {LifecycleUpdateJournal}
    */
   get journal() {
     if (this.isIntersectedSet) return;
-    return (this._journal = this._journal || new Journal({ set: this }));
+    return (this._journal = this._journal || new LifecycleUpdateJournal({ set: this }));
   }
 
   /**
@@ -278,14 +277,6 @@ export default class ScoringSet extends LifecycleSet {
       isComplete,
       isPassed
     ], '_statusHash');
-  }
-
-  /**
-   * Add a model as having triggered this set's next update.
-   * @param {Backbone.Model} model
-   */
-  addPendingUpdateModel(model) {
-    this._pendingUpdateModels.add(model);
   }
 
   /** @override */
@@ -319,8 +310,6 @@ export default class ScoringSet extends LifecycleSet {
     if (this.isComplete && this._isCompleteChange && !this._isAvailableChange) await this.onCompleted();
     if (this.isPassed && this._isPassedChange && !this._isAvailableChange) await this.onPassed();
     if (this._isStatusChange) this.objective?.setStatus();
-    this.journal?.update(this._pendingUpdateModels);
-    this._pendingUpdateModels.clear();
     await super.onUpdate();
   }
 

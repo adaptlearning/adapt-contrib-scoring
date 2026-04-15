@@ -23,7 +23,7 @@ import IntersectionSet from './IntersectionSet';
 import LifecycleSet from './LifecycleSet';
 import ScoringSet from './ScoringSet';
 import Objective from './Objective';
-import Journal from './Journal';
+import LifecycleUpdateJournal from './LifecycleUpdateJournal';
 import State from './State';
 import StateModels from './StateModels';
 import StateSetModelChildren from './StateSetModelChildren';
@@ -42,7 +42,7 @@ export {
   LifecycleSet,
   ScoringSet,
   Objective,
-  Journal,
+  LifecycleUpdateJournal,
   State,
   StateSetModelChildren,
   StateModels

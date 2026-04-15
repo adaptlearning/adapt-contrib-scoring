@@ -1,6 +1,7 @@
 import Adapt from 'core/js/adapt';
 import Passmark from './Passmark';
 import ScoringSet from './ScoringSet';
+import TotalLifecycleUpdateJournal from './TotalLifecycleUpdateJournal';
 import {
   createIntersectedSet
 } from './utils/intersection';
@@ -183,6 +184,12 @@ export default class TotalSets extends ScoringSet {
    */
   get canReset() {
     return this.scoringSets.some(set => set?.canReset);
+  }
+
+  /** @override */
+  get journal() {
+    if (this.isIntersectedSet) return;
+    return (this._journal = this._journal || new TotalLifecycleUpdateJournal({ set: this }));
   }
 
 }

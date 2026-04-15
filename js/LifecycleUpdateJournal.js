@@ -7,9 +7,9 @@ import _ from 'underscore';
 /** @typedef {import("./ScoringSet").default} ScoringSet */
 
 /**
- * A journal for recording the updates to a set.
+ * A journal for recording the lifecycle updates to a set.
  */
-export default class Journal {
+export default class LifecycleUpdateJournal {
 
   /**
    * @param {Object} options
@@ -17,16 +17,25 @@ export default class Journal {
    */
   constructor({ set } = {}) {
     this.set = set;
+    this._pendingUpdateModels = new Set();
     this._pendingUpdateModifiers = [];
   }
 
   /**
-   * Update the journal for the models pending updates.
-   * @param {Set<Backbone.Model>} pendingUpdateModels
+   * Add the model as having triggered this set's next update.
+   * @param {Backbone.Model} model
    */
-  update(pendingUpdateModels) {
-    pendingUpdateModels.forEach(model => this._addUpdateModifiers(model));
+  addPendingUpdateModel(model) {
+    this._pendingUpdateModels.add(model);
+  }
+
+  /**
+   * Update the journal for the models pending updates.
+   */
+  update() {
+    this._pendingUpdateModels.forEach(model => this._addUpdateModifiers(model));
     this._write();
+    this._pendingUpdateModels.clear();
     this._pendingUpdateModifiers = [];
   }
 
@@ -58,14 +67,6 @@ export default class Journal {
   getScoreByModel(model) {
     if (!this.set.questions.includes(model)) return 0;
     return model.score;
-  }
-
-  /**
-   * Returns the list of modifiers which impacted the last update.
-   * @returns {Array}
-   */
-  get pendingUpdateModifiers() {
-    return this._pendingUpdateModifiers;
   }
 
   /**
@@ -118,7 +119,7 @@ export default class Journal {
         maxScore: isAvailable ? maxScore : -maxScore
       };
       if (questionModel.get('_isSubmitted')) data.score = isAvailable ? score : -score;
-      this.pendingUpdateModifiers.push(data);
+      this._pendingUpdateModifiers.push(data);
     });
   }
 
@@ -128,7 +129,7 @@ export default class Journal {
    * @param {Backbone.Model} model
    */
   _addCompletionModifiers(model) {
-    this.pendingUpdateModifiers.push({
+    this._pendingUpdateModifiers.push({
       modelId: model.get('_id'),
       score: this.getScoreByModel(model)
     });
@@ -143,7 +144,7 @@ export default class Journal {
     const hasSetDataChanged = !(_.isEqual(this._lastSetData, setData));
     if (!hasSetDataChanged) return;
     const data = { ...setData };
-    if (this.pendingUpdateModifiers.length) data.modifiers = this.pendingUpdateModifiers;
+    if (this._pendingUpdateModifiers.length) data.modifiers = this._pendingUpdateModifiers;
     Logging.info('scoring:update', JSON.stringify(data));
     this._lastSetData = setData;
   }
