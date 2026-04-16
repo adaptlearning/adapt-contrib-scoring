@@ -1,4 +1,5 @@
 import Adapt from 'core/js/adapt';
+import data from 'core/js/data';
 import {
   getSubsetsByQuery
 } from './utils/query';
@@ -15,9 +16,7 @@ import {
   setupBackwardCompatibility
 } from './compatibility';
 import './helpers';
-import Backbone from 'backbone';
 import Lifecycle from './Lifecycle';
-import data from 'core/js/data';
 import AdaptModelSet from './AdaptModelSet';
 import IntersectionSet from './IntersectionSet';
 import LifecycleSet from './LifecycleSet';
@@ -27,7 +26,9 @@ import LifecycleUpdateJournal from './LifecycleUpdateJournal';
 import State from './State';
 import StateModels from './StateModels';
 import StateSetModelChildren from './StateSetModelChildren';
+import Passmark from './Passmark';
 import TotalSets from './TotalSets';
+import Backbone from 'backbone';
 
 export * from './utils/hash';
 export * from './utils/intersection';
@@ -45,7 +46,8 @@ export {
   LifecycleUpdateJournal,
   State,
   StateSetModelChildren,
-  StateModels
+  StateModels,
+  Passmark
 };
 
 /**
