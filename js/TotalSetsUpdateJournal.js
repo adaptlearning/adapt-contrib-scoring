@@ -54,12 +54,4 @@ export default class TotalSetsUpdateJournal extends ScoringUpdateJournal {
     return sources;
   }
 
-  /**
-   * Log the updates to the set based on the pending update models and sets, then clear the pending updates.
-   */
-  update() {
-    this.log();
-    this.clear();
-  }
-
 }
