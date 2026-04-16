@@ -2,6 +2,7 @@ import Adapt from 'core/js/adapt';
 import Logging from 'core/js/logging';
 import State from './State';
 import IntersectionSet from './IntersectionSet';
+import LifecycleUpdateJournal from './LifecycleUpdateJournal';
 
 /**
  * Set at which intersections and queries can be performed.
@@ -18,6 +19,15 @@ export default class LifecycleSet extends IntersectionSet {
   get state() {
     if (this.isIntersectedSet) return;
     return (this._state = this._state || new State({ set: this }));
+  }
+
+  /**
+   * The journal for recording the updates to the set.
+   * @returns {LifecycleUpdateJournal}
+   */
+  get journal() {
+    if (this.isIntersectedSet) return;
+    return (this._journal = this._journal || new LifecycleUpdateJournal({ set: this }));
   }
 
   /**

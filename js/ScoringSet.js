@@ -2,7 +2,6 @@ import Adapt from 'core/js/adapt';
 import Logging from 'core/js/logging';
 import LifecycleSet from './LifecycleSet';
 import Objective from './Objective';
-import LifecycleUpdateJournal from './LifecycleUpdateJournal';
 import {
   getScaledScoreFromMinMax
 } from './utils/scoring';
@@ -12,6 +11,7 @@ import {
 import {
   hasHashChanged
 } from './utils/hash';
+import ScoringUpdateJournal from './ScoringUpdateJournal';
 
 /**
  * The class provides an abstract that describes a set of models which can be extended with custom
@@ -243,11 +243,11 @@ export default class ScoringSet extends LifecycleSet {
 
   /**
    * The journal for recording the updates to the set.
-   * @returns {LifecycleUpdateJournal}
+   * @returns {ScoringUpdateJournal}
    */
   get journal() {
     if (this.isIntersectedSet) return;
-    return (this._journal = this._journal || new LifecycleUpdateJournal({ set: this }));
+    return (this._journal = this._journal || new ScoringUpdateJournal({ set: this }));
   }
 
   /**

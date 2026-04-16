@@ -24,6 +24,8 @@ import LifecycleSet from './LifecycleSet';
 import ScoringSet from './ScoringSet';
 import Objective from './Objective';
 import LifecycleUpdateJournal from './LifecycleUpdateJournal';
+import ScoringUpdateJournal from './ScoringUpdateJournal';
+import TotalSetsUpdateJournal from './TotalSetsUpdateJournal';
 import State from './State';
 import StateModels from './StateModels';
 import StateSetModelChildren from './StateSetModelChildren';
@@ -40,12 +42,15 @@ export {
   AdaptModelSet,
   IntersectionSet,
   LifecycleSet,
-  ScoringSet,
-  Objective,
   LifecycleUpdateJournal,
+  Objective,
+  ScoringSet,
+  ScoringUpdateJournal,
   State,
+  StateModels,
   StateSetModelChildren,
-  StateModels
+  TotalSets,
+  TotalSetsUpdateJournal
 };
 
 /**
