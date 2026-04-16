@@ -6,7 +6,6 @@ import {
 import {
   unique
 } from './math';
-
 /** @typedef {import("../IntersectionSet").default} IntersectionSet */
 
 /**
@@ -18,6 +17,33 @@ import {
 export function getAllSets({ excludeParent = null } = {}) {
   if (!excludeParent) return Adapt.scoring.sets;
   return Adapt.scoring.sets.filter(set => !(set.id === excludeParent.id && set.type === excludeParent.type));
+}
+
+/**
+ * Returns a registered set by id.
+ * @param {string} id
+ * @returns {IntersectionSet}
+ */
+export function getSetById(id) {
+  return findSetById(getAllSets(), id);
+}
+
+/**
+ * Returns registered sets of type.
+ * @param {string} type
+ * @returns {IntersectionSet[]}
+ */
+export function getSetsByType(type) {
+  return filterSetsByType(getAllSets(), type);
+}
+
+/**
+ * Returns registered sets intersecting the given model id.
+ * @param {string} id
+ * @returns {IntersectionSet[]}
+ */
+export function getSetsByIntersectingModelId(id) {
+  return filterSetsByIntersectingModelId(getAllSets(), id);
 }
 
 /**

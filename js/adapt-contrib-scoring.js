@@ -1,11 +1,12 @@
 import Adapt from 'core/js/adapt';
+import data from 'core/js/data';
 import {
   getSubsetsByQuery
 } from './utils/query';
 import {
-  filterSetsByType,
-  filterSetsByIntersectingModelId,
-  findSetById
+  getSetById,
+  getSetsByType,
+  getSetsByIntersectingModelId
 } from './utils/sets';
 import {
   getPathSetsIntersected
@@ -15,9 +16,7 @@ import {
   setupBackwardCompatibility
 } from './compatibility';
 import './helpers';
-import Backbone from 'backbone';
 import Lifecycle from './Lifecycle';
-import data from 'core/js/data';
 import AdaptModelSet from './AdaptModelSet';
 import IntersectionSet from './IntersectionSet';
 import LifecycleSet from './LifecycleSet';
@@ -29,7 +28,9 @@ import TotalSetsUpdateJournal from './TotalSetsUpdateJournal';
 import State from './State';
 import StateModels from './StateModels';
 import StateSetModelChildren from './StateSetModelChildren';
+import Passmark from './Passmark';
 import TotalSets from './TotalSets';
+import Backbone from 'backbone';
 
 export * from './utils/hash';
 export * from './utils/intersection';
@@ -44,6 +45,7 @@ export {
   LifecycleSet,
   LifecycleUpdateJournal,
   Objective,
+  Passmark,
   ScoringSet,
   ScoringUpdateJournal,
   State,
@@ -101,7 +103,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns registered root sets.
+   * Returns registered sets.
    * @returns {IntersectionSet[]}
    */
   get sets() {
@@ -109,7 +111,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Removes all registered root sets.
+   * Removes all registered sets.
    */
   clear() {
     this._sets?.forEach(set => this.deregister(set));
@@ -117,7 +119,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Register a configured root scoring set.
+   * Register a configured scoring set.
    * This is usually performed automatically upon IntersectionSet instantiation.
    * @param {IntersectionSet} newSet
    * @fires Adapt#{set.type}:register
@@ -132,7 +134,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Deregister a configured root scoring set.
+   * Deregister a configured scoring set.
    * @param {IntersectionSet} oldSet
    * @fires Adapt#{set.type}:deregister
    * @fires Adapt#scoring:deregister
@@ -155,7 +157,7 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Reset all subsets which can be reset.
+   * Reset all registered sets which can be reset.
    * @fires Adapt#scoring:reset via lifecycle
    */
   async reset() {
@@ -165,59 +167,49 @@ export class Scoring extends Backbone.Controller {
   }
 
   /**
-   * Returns a registered root set by id.
+   * Returns a registered set by id.
    * @param {string} id
    * @returns {IntersectionSet}
    */
   getSetById(id) {
-    return findSetById(this.sets, id);
+    return getSetById(id);
   }
 
   /**
-   * Returns registered root sets of type.
+   * Returns registered sets of type.
    * @param {string} type
    * @returns {IntersectionSet[]}
    */
   getSetsByType(type) {
-    return filterSetsByType(this.sets, type);
+    return getSetsByType(type);
   }
 
   /**
-   * Returns registered root sets intersecting the given model id.
+   * Returns registered sets intersecting the given model id.
    * @param {string} id
    * @returns {IntersectionSet[]}
    */
   getSetsByIntersectingModelId(id) {
-    return filterSetsByIntersectingModelId(this.sets, id);
+    return getSetsByIntersectingModelId(id);
   }
 
   /**
-   * Returns a root set or intersection set by id path.
+   * Returns a registered set or intersection set by id path.
    * example: id.id.id
    * @param {string|[string]} path
    * @returns {IntersectionSet}
    */
   getSubsetByPath(path) {
-    const sets = getPathSetsIntersected(path);
-    return sets;
+    return getPathSetsIntersected(path);
   }
 
   /**
-   * Returns sets or intersection sets by query.
+   * Returns registered sets or intersection sets by query.
    * @param {string} query
    * @returns {IntersectionSet[]}
    */
   getSubsetsByQuery(query) {
     return getSubsetsByQuery(query);
-  }
-
-  /**
-   * Returns a set or intersection set by query.
-   * @param {string} query
-   * @returns {IntersectionSet}
-   */
-  getSubsetByQuery(query) {
-    return getSubsetsByQuery(query)[0];
   }
 
 }
