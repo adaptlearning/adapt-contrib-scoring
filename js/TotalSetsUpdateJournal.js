@@ -27,7 +27,7 @@ export default class TotalSetsUpdateJournal extends LifecycleUpdateJournal {
       const isAvailabilityChange = Object.hasOwn(model.changed, '_isAvailable');
       if (isAvailabilityChange) {
         // If the parent availability has changed, we log the score
-        // changes for all current child questions in the set.
+        // changes for all changed sets and their questions.
         const models = model.hasManagedChildren ? model.getChildren() : [model];
         const relevantSets = this.set.scoringSets.filter(set => this.pendingUpdateSets.has(set));
         relevantSets.forEach(set => {
