@@ -8,7 +8,7 @@ import _ from 'underscore';
 /** @typedef {import("./ScoringSet").default} ScoringSet */
 
 /**
- * A journal for recording the lifecycle updates to a set.
+ * A journal for recording the models and sets that triggered set updates in the current lifecycle.
  */
 export default class ScoringUpdateJournal extends LifecycleUpdateJournal {
 
