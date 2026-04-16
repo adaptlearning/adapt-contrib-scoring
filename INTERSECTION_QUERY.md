@@ -58,9 +58,9 @@ Here you can use these additional literal attributes for queries:
 * `(isFailed)` is and alias `(isComplete,isPassed=false)`
 
 ### TotalSets
-This is a set of sets, it can sum the scores of the root or intersecting sets. 
+This is a set of sets, it can sum the scores of the registered or intersecting sets.
 
-It extends `ScoringSet` with the caveat that it sums properties from root or intersecting scoring sets and completion sets rather than root or intersecting models.
+It extends `ScoringSet` with the caveat that it sums properties from registered or intersecting scoring sets and completion sets rather than registered or intersecting models.
 
 It represents the overall completion, score, correctness, pass and fail of the course.
 

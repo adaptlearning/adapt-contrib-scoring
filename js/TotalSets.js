@@ -14,10 +14,10 @@ import {
 } from './utils/math';
 
 /**
- * A set of sets, it can sum the scores of the root or intersecting sets.
+ * A set of sets, it can sum the scores of the registered or intersecting sets.
  *
- * It extends `ScoringSet` with the caveat that it sums properties from root or
- * intersecting scoring sets and completion sets rather than root or intersecting models.
+ * It extends `ScoringSet` with the caveat that it sums properties from registered or
+ * intersecting scoring sets and completion sets rather than registered or intersecting models.
  *
  * It represents the overall completion, score, correctness, pass and fail of the course.
  */
@@ -142,7 +142,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns whether all root sets marked with `_isCompletionRequired` are completed.
+   * Returns whether all registered sets marked with `_isCompletionRequired` are completed.
    * @override
    * @returns {boolean}
    */
@@ -168,7 +168,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns whether any root sets marked with `_isScoreIncluded` are failed and cannot be reset.
+   * Returns whether any registered sets marked with `_isScoreIncluded` are failed and cannot be reset.
    * @override
    * @todo Add `canReset` to `ScoringSet`?
    * @returns {boolean}
@@ -178,7 +178,7 @@ export default class TotalSets extends ScoringSet {
   }
 
   /**
-   * Returns whether any root sets marked with `_isScoreIncluded` can be reset.
+   * Returns whether any registered sets marked with `_isScoreIncluded` can be reset.
    * @override
    * @returns {boolean}
    */
