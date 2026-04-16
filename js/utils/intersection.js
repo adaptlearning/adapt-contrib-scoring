@@ -2,7 +2,6 @@ import {
   getAllSets,
   findSetById
 } from './sets';
-
 /** @typedef {import("../IntersectionSet").default} IntersectionSet */
 
 /**

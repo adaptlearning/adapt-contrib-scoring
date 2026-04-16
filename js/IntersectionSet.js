@@ -103,7 +103,7 @@ export default class IntersectionSet extends Backbone.Controller {
    * @fires Adapt#scoring:set:register
    */
   register() {
-    // Only register root sets, intersection subsets are dynamically created when required
+    // Only register configured sets, intersection subsets are dynamically created when required
     if (this.isIntersectedSet) return;
     assignAutoId(this);
     Adapt.scoring.register(this);
