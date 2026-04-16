@@ -1,10 +1,10 @@
-import Logging from 'core/js/logging';
 import LifecycleUpdateJournal from './LifecycleUpdateJournal';
 import {
   filterModelsByIntersectingModels,
   isModelAvailableInHierarchy
 } from './utils/models';
 import _ from 'underscore';
+import Logging from 'core/js/logging';
 /** @typedef {import("./ScoringSet").default} ScoringSet */
 
 /**
@@ -16,6 +16,44 @@ export default class ScoringUpdateJournal extends LifecycleUpdateJournal {
    * Log the updates to the set based on the pending update models and sets, then clear the pending updates.
    */
   update() {
+    this.log();
+    this.clear();
+  }
+
+  /**
+   * Log the updates to the set based on the pending update models and sets, then clear the pending updates.
+   */
+  log () {
+    const setData = this.setData;
+    const hasSetDataChanged = !(_.isEqual(this._lastSetData, setData));
+    if (!hasSetDataChanged) return;
+    const data = { ...setData };
+    const sources = this.sourceData;
+    if (sources.length) {
+      data.sources = sources;
+    }
+    Logging.info('scoring:update', JSON.stringify(data));
+    this._lastSetData = setData;
+  }
+
+  /**
+   * Returns the set data to log.
+   * @returns {object}
+   */
+  get setData() {
+    return {
+      id: this.set.id,
+      type: this.set.type,
+      minScore: this.set.minScore,
+      maxScore: this.set.maxScore,
+      score: this.set.score,
+      scaledScore: this.set.scaledScore,
+      isComplete: this.set.isComplete,
+      isPassed: this.set.isPassed
+    };
+  }
+
+  get sourceData() {
     const sources = [];
     for (const model of this.pendingUpdateModels) {
       const isAvailabilityChange = Object.hasOwn(model.changed, '_isAvailable');
@@ -46,17 +84,7 @@ export default class ScoringUpdateJournal extends LifecycleUpdateJournal {
         score: this.getScoreByModel(model)
       });
     }
-    const setData = this.setData;
-    const hasSetDataChanged = !(_.isEqual(this._lastSetData, setData));
-    if (hasSetDataChanged) {
-      const data = { ...setData };
-      if (sources.length) {
-        data.sources = sources;
-      }
-      Logging.info('scoring:update', JSON.stringify(data));
-      this._lastSetData = setData;
-    }
-    this.clear();
+    return sources;
   }
 
   /**
@@ -87,23 +115,6 @@ export default class ScoringUpdateJournal extends LifecycleUpdateJournal {
   getScoreByModel(model) {
     if (!this.set.questions.includes(model)) return 0;
     return model.score;
-  }
-
-  /**
-   * Returns the set data to log.
-   * @returns {object}
-   */
-  get setData() {
-    return {
-      id: this.set.id,
-      type: this.set.type,
-      minScore: this.set.minScore,
-      maxScore: this.set.maxScore,
-      score: this.set.score,
-      scaledScore: this.set.scaledScore,
-      isComplete: this.set.isComplete,
-      isPassed: this.set.isPassed
-    };
   }
 
 }

@@ -1,5 +1,4 @@
-import Logging from 'core/js/logging';
-import LifecycleUpdateJournal from './ScoringUpdateJournal';
+import ScoringUpdateJournal from './ScoringUpdateJournal';
 import {
   filterModelsByIntersectingModels,
   isModelAvailableInHierarchy
@@ -16,12 +15,9 @@ import {
 /**
  * A journal for recording the models and sets that triggered set updates in the current lifecycle.
  */
-export default class TotalSetsUpdateJournal extends LifecycleUpdateJournal {
+export default class TotalSetsUpdateJournal extends ScoringUpdateJournal {
 
-  /**
-   * Log the updates to the set based on the pending update models and sets, then clear the pending updates.
-   */
-  update() {
+  get sourceData() {
     const sources = [];
     for (const model of this.pendingUpdateModels) {
       const isAvailabilityChange = Object.hasOwn(model.changed, '_isAvailable');
@@ -55,16 +51,14 @@ export default class TotalSetsUpdateJournal extends LifecycleUpdateJournal {
         });
       });
     }
-    const setData = this.setData;
-    const hasSetDataChanged = !(_.isEqual(this._lastSetData, setData));
-    if (hasSetDataChanged) {
-      const data = { ...setData };
-      if (sources.length) {
-        data.sources = sources;
-      }
-      Logging.info('scoring:update', JSON.stringify(data));
-      this._lastSetData = setData;
-    }
+    return sources;
+  }
+
+  /**
+   * Log the updates to the set based on the pending update models and sets, then clear the pending updates.
+   */
+  update() {
+    this.log();
     this.clear();
   }
 
