@@ -1,5 +1,19 @@
 import Adapt from 'core/js/adapt';
 import data from 'core/js/data';
+import Lifecycle from './Lifecycle';
+import AdaptModelSet from './AdaptModelSet';
+import IntersectionSet from './IntersectionSet';
+import LifecycleSet from './LifecycleSet';
+import ScoringSet from './ScoringSet';
+import TotalSets from './TotalSets';
+import Passmark from './Passmark';
+import Objective from './Objective';
+import LifecycleUpdateJournal from './LifecycleUpdateJournal';
+import ScoringUpdateJournal from './ScoringUpdateJournal';
+import TotalSetsUpdateJournal from './TotalSetsUpdateJournal';
+import State from './State';
+import StateModels from './StateModels';
+import StateSetModelChildren from './StateSetModelChildren';
 import {
   getSubsetsByQuery
 } from './utils/query';
@@ -16,18 +30,6 @@ import {
   setupBackwardCompatibility
 } from './compatibility';
 import './helpers';
-import Lifecycle from './Lifecycle';
-import AdaptModelSet from './AdaptModelSet';
-import IntersectionSet from './IntersectionSet';
-import LifecycleSet from './LifecycleSet';
-import ScoringSet from './ScoringSet';
-import Objective from './Objective';
-import LifecycleUpdateJournal from './LifecycleUpdateJournal';
-import State from './State';
-import StateModels from './StateModels';
-import StateSetModelChildren from './StateSetModelChildren';
-import Passmark from './Passmark';
-import TotalSets from './TotalSets';
 import Backbone from 'backbone';
 
 export * from './utils/hash';
@@ -42,12 +44,15 @@ export {
   IntersectionSet,
   LifecycleSet,
   ScoringSet,
+  TotalSets,
+  Passmark,
   Objective,
   LifecycleUpdateJournal,
+  ScoringUpdateJournal,
+  TotalSetsUpdateJournal,
   State,
   StateSetModelChildren,
-  StateModels,
-  Passmark
+  StateModels
 };
 
 /**
