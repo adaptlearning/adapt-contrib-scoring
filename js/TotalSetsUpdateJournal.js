@@ -17,6 +17,12 @@ import {
  */
 export default class TotalSetsUpdateJournal extends ScoringUpdateJournal {
 
+  /**
+   * Returns the pending update sets score data for logging.
+   * For availability changes, all intersecting sets are included with scores negated if now unavailable.
+   * @override
+   * @returns {{ setId: string, minScore?: number, maxScore?: number, score?: number }[]}
+   */
   get sourceData() {
     const sources = [];
     for (const model of this.pendingUpdateModels) {
@@ -34,7 +40,7 @@ export default class TotalSetsUpdateJournal extends ScoringUpdateJournal {
           const maxScore = sum(questions, questionModel => journal.getMaxScoreByModel(questionModel));
           const score = sum(questions, questionModel => journal.getScoreByModel(questionModel));
           const data = {
-            id: set.id,
+            setId: set.id,
             minScore: isAvailable ? minScore : -minScore,
             maxScore: isAvailable ? maxScore : -maxScore
           };
@@ -46,7 +52,7 @@ export default class TotalSetsUpdateJournal extends ScoringUpdateJournal {
       const modelIntersectedTotalSets = getSubsetsByQuery(`#${model.get('_id')} ${this.set.type}`)[0]?.scoringSets ?? [];
       modelIntersectedTotalSets.forEach(set => {
         sources.push({
-          id: set.id,
+          setId: set.id,
           score: set.score
         });
       });

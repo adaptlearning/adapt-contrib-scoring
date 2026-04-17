@@ -2,6 +2,7 @@ import Adapt from 'core/js/adapt';
 import Logging from 'core/js/logging';
 import LifecycleSet from './LifecycleSet';
 import Objective from './Objective';
+import ScoringUpdateJournal from './ScoringUpdateJournal';
 import {
   getScaledScoreFromMinMax
 } from './utils/scoring';
@@ -11,7 +12,6 @@ import {
 import {
   hasHashChanged
 } from './utils/hash';
-import ScoringUpdateJournal from './ScoringUpdateJournal';
 
 /**
  * The class provides an abstract that describes a set of models which can be extended with custom

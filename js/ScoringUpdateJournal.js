@@ -14,6 +14,7 @@ export default class ScoringUpdateJournal extends LifecycleUpdateJournal {
 
   /**
    * Log the updates to the set based on the pending update models and sets, then clear the pending updates.
+   * @override
    */
   update() {
     this.log();
@@ -23,7 +24,7 @@ export default class ScoringUpdateJournal extends LifecycleUpdateJournal {
   /**
    * Log the updates to the set based on the pending update models and sets, then clear the pending updates.
    */
-  log () {
+  log() {
     const setData = this.setData;
     const hasSetDataChanged = !(_.isEqual(this._lastSetData, setData));
     if (!hasSetDataChanged) return;
@@ -53,6 +54,11 @@ export default class ScoringUpdateJournal extends LifecycleUpdateJournal {
     };
   }
 
+  /**
+   * Returns the pending update models score data for logging.
+   * For availability changes, all intersecting set questions are included with scores negated if now unavailable.
+   * @returns {{ modelId: string, minScore?: number, maxScore?: number, score?: number }[]}
+   */
   get sourceData() {
     const sources = [];
     for (const model of this.pendingUpdateModels) {
