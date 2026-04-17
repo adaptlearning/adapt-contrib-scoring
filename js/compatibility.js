@@ -27,11 +27,11 @@ export function setupBackwardCompatibility(scoring) {
     getState: () => getCompatibilityState(scoring)
   };
   Adapt
-    .off('scoring:restored', onScoringRestored)
-    .on('scoring:restored', onScoringRestored);
+    .off('scoring:total:restored', onScoringRestored)
+    .on('scoring:total:restored', onScoringRestored);
   Adapt
-    .off('scoring:complete', onScoringComplete)
-    .on('scoring:complete', onScoringComplete);
+    .off('scoring:total:complete', onScoringComplete)
+    .on('scoring:total:complete', onScoringComplete);
 }
 
 /**
