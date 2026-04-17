@@ -147,7 +147,8 @@ export default class TotalSets extends ScoringSet {
    * @returns {boolean}
    */
   get isComplete() {
-    return this.completionSets.every(set => set.isComplete);
+    const completionSets = this.completionSets;
+    return completionSets.length > 0 && completionSets.every(set => set.isComplete);
   }
 
   /**
@@ -160,6 +161,8 @@ export default class TotalSets extends ScoringSet {
     // if (!this.isComplete) return false; // must be completed for a pass
     // if (!this.passmark.isEnabled && this.isComplete) return true; // always pass if complete and passmark is disabled
     const isEverySubsetPassed = this.scoringSets.every(set => set.isPassed);
+    const scoringSets = this.scoringSets;
+    const isEverySubsetPassed = scoringSets.length > 0 && scoringSets.every(set => set.isPassed);
     const isScaled = this.passmark.isScaled;
     const score = (isScaled) ? this.scaledScore : this.score;
     const correctness = (isScaled) ? this.scaledCorrectness : this.correctness;

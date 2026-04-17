@@ -141,6 +141,7 @@ export class Scoring extends Backbone.Controller {
    */
   deregister(oldSet) {
     const setIndex = this.sets.findIndex(set => set.id === oldSet.id);
+    if (setIndex === -1) return;
     this.sets.splice(setIndex, 1);
     this.sets.sort((a, b) => a.order - b.order);
     Adapt.trigger(`${oldSet.type}:deregister scoring:deregister`, oldSet);

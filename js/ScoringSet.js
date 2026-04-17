@@ -210,7 +210,8 @@ export default class ScoringSet extends LifecycleSet {
    * @returns {boolean}
    */
   get isComplete() {
-    return this.availableModels.every(model => model.get('_isComplete'));
+    const availableModels = this.availableModels;
+    return availableModels.length > 0 && availableModels.every(model => model.get('_isComplete'));
   }
 
   /**
