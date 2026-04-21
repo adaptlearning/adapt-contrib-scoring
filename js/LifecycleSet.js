@@ -119,7 +119,7 @@ export default class LifecycleSet extends IntersectionSet {
    * @fires Adapt#scoring:set:reset
    */
   async reset() {
-    if (this.isIntersectedSet) return;
+    if (this.isIntersectedSet || !this.canReset) return;
     Adapt.trigger(`scoring:${this.type}:reset scoring:set:reset`, this);
     Logging.debug(`${this.id} reset`);
     this.trigger('reset', this);

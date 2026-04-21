@@ -70,7 +70,7 @@ export default class Lifecycle extends Backbone.Controller {
    * Listens to a newly registered Set's reset and update events.
    * @listens AdaptModelSet#reset
    * @listens AdaptModelSet#update
-   * @param {InteractionSet} newSet
+   * @param {IntersectionSet} newSet
    */
   onScoringSetRegister(newSet) {
     this.listenTo(newSet, {
@@ -195,7 +195,7 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send all sets into the restore phase.
-   * @fires Adapt#scoring:restored
+   * @fires Adapt#scoring:lifecycle:restored
    */
   async restore() {
     const sets = getAllSets();
@@ -205,7 +205,7 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send all sets into the start phase.
-   * @fires Adapt#scoring:start
+   * @fires Adapt#scoring:lifecycle:start
    */
   async start() {
     const sets = getAllSets();
@@ -215,7 +215,7 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send all sets into the reset phase.
-   * @fires Adapt#scoring:reset
+   * @fires Adapt#scoring:lifecycle:reset
    */
   async reset() {
     const sets = getAllSets();
@@ -225,7 +225,7 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send givens sets into the restart phase.
-   * @param {InteractionSet[]} sets
+   * @param {IntersectionSet[]} sets
    */
   async restart(sets) {
     sets = sets.filter(set => !set.intersectionParent);
@@ -234,7 +234,7 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send givens sets into the leave phase.
-   * @param {InteractionSet[]} sets
+   * @param {IntersectionSet[]} sets
    */
   async leave(sets) {
     sets = sets.filter(set => !set.intersectionParent);
@@ -243,7 +243,7 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send givens sets into the visit phase.
-   * @param {InteractionSet[]} sets
+   * @param {IntersectionSet[]} sets
    */
   async visit(sets) {
     sets = sets.filter(set => !set.intersectionParent);
@@ -252,9 +252,9 @@ export default class Lifecycle extends Backbone.Controller {
 
   /**
    * Send givens sets into the update phase.
-   * @param {InteractionSet[]} sets
+   * @param {IntersectionSet[]} sets
    * @param {Backbone.Model} model
-   * @fires Adapt#scoring:update
+   * @fires Adapt#scoring:lifecycle:update
    */
   async update(sets, model = null) {
     sets = sets.filter(set => !set.intersectionParent);
