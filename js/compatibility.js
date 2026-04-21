@@ -42,7 +42,7 @@ export function getCompatibilityState(scoring) {
   const state = {
     isComplete: scoring.total.isComplete,
     isPercentageBased: scoring.total.passmark.isScaled,
-    isPass: scoring.total.isPassed,
+    isPass: scoring.total.isPassed ?? scoring.total.isComplete,
     maxScore: scoring.total.maxScore,
     minScore: scoring.total.minScore,
     score: scoring.total.score,

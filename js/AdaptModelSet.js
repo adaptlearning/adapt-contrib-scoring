@@ -53,8 +53,13 @@ export default class AdaptModelSet extends ScoringSet {
   }
 
   /** @override */
+  get isPassed() {
+    return null;
+  }
+
+  /** @override */
   get isFailed() {
-    return false;
+    return null;
   }
 
   /** @override */

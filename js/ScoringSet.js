@@ -224,22 +224,32 @@ export default class ScoringSet extends LifecycleSet {
   }
 
   /**
-   * Returns whether the configured passmark has been achieved.
-   * query example: `(isPassed)`
+   * Returns whether a passmark is configured and enabled for this set.
    * @returns {boolean}
    */
+  get hasPassmark() {
+    return this.passmark?.isEnabled ?? false;
+  }
+
+  /**
+   * Returns whether the configured passmark has been achieved.
+   * Subclasses with a passmark override this to return a boolean verdict.
+   * query example: `(isPassed)`
+   * @returns {boolean|null}
+   */
   get isPassed() {
-    return this.isComplete;
+    return null;
   }
 
   /**
    * Returns whether the configured passmark has been failed.
+   * Returns null when no passmark is configured, false when incomplete or passed.
    * query example: `(isFailed)` alias for `(isComplete,isPassed=false)`
    * @returns {boolean|null}
    */
   get isFailed() {
-    if (!this.isSubmitted) return null;
-    return (this.isPassed === false);
+    if (!this.hasPassmark) return null;
+    return this.isComplete && this.isPassed === false;
   }
 
   /**

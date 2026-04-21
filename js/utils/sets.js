@@ -134,3 +134,15 @@ export function filterSetsByLocalModelId(sets, id) {
 export function findSetById(sets, id) {
   return sets.find(set => id === set.id);
 }
+
+/**
+ * Returns whether every set with a passmark has passed.
+ * Sets without a passmark are excluded from the check.
+ * Returns false if no sets with a passmark exist.
+ * @param {ScoringSet[]} sets
+ * @returns {boolean}
+ */
+export function isEverySetPassed(sets) {
+  const applicableSets = sets.filter(set => set.hasPassmark);
+  return applicableSets.length > 0 && applicableSets.every(set => set.isPassed);
+}

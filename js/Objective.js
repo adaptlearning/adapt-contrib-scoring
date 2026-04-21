@@ -58,7 +58,7 @@ export default class Objective {
     if (isAvailable && isStarted && isIncomplete) completionStatus = COMPLETION_STATE.INCOMPLETE.asLowerCase;
     if (isAvailable && isComplete) {
       completionStatus = COMPLETION_STATE.COMPLETED.asLowerCase;
-      if (this.set.passmark?.isEnabled) successStatus = (isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
+      if (this.set.hasPassmark) successStatus = (isPassed ? COMPLETION_STATE.PASSED : COMPLETION_STATE.FAILED).asLowerCase;
     }
     offlineStorage.set('objectiveStatus', this.id, completionStatus, successStatus);
   }
@@ -75,7 +75,7 @@ export default class Objective {
   /**
    * Returns whether the objective for the set is passed.
    * Depending on the set logic, this can differ to whether the set was passed.
-   * @returns {boolean}
+   * @returns {boolean|null}
    */
   get isPassed() {
     return this.set.isPassed;

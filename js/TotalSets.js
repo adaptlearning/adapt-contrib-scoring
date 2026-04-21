@@ -6,7 +6,8 @@ import {
   createIntersectedSet
 } from './utils/intersection';
 import {
-  filterSetsByIntersectingModels
+  filterSetsByIntersectingModels,
+  isEverySetPassed
 } from './utils/sets';
 import {
   unique,
@@ -153,30 +154,29 @@ export default class TotalSets extends ScoringSet {
 
   /**
    * Returns whether the configured passmark has been achieved for `_isScoreIncluded` sets.
+   * If passmark is disabled, don't evaluate.
    * If _passmark._requiresPassedSubsets then all scoring subsets have to be passed.
    * @override
-   * @returns {boolean}
+   * @returns {boolean|null}
    */
   get isPassed() {
-    // if (!this.isComplete) return false; // must be completed for a pass
-    // if (!this.passmark.isEnabled && this.isComplete) return true; // always pass if complete and passmark is disabled
-    const isEverySubsetPassed = this.scoringSets.every(set => set.isPassed);
-    const scoringSets = this.scoringSets;
-    const isEverySubsetPassed = scoringSets.length > 0 && scoringSets.every(set => set.isPassed);
+    if (!this.hasPassmark) return null;
+    if (!this.isComplete) return false; // must be completed for a pass
     const isScaled = this.passmark.isScaled;
     const score = (isScaled) ? this.scaledScore : this.score;
     const correctness = (isScaled) ? this.scaledCorrectness : this.correctness;
     const isPassed = score >= this.passmark.score && correctness >= this.passmark.correctness;
-    return this.passmark.requiresPassedSubsets ? isPassed && isEverySubsetPassed : isPassed;
+    return this.passmark.requiresPassedSubsets ? isPassed && isEverySetPassed(this.scoringSets) : isPassed;
   }
 
   /**
    * Returns whether any registered sets marked with `_isScoreIncluded` are failed and cannot be reset.
+   * If passmark is disabled, don't evaluate.
    * @override
-   * @todo Add `canReset` to `ScoringSet`?
-   * @returns {boolean}
+   * @returns {boolean|null}
    */
   get isFailed() {
+    if (!this.hasPassmark) return null;
     return this.isComplete && !this.isPassed && !this.canReset;
   }
 
