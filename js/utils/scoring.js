@@ -1,3 +1,8 @@
+import {
+  sum
+} from './math';
+/** @typedef {import("../IntersectionSet").default} IntersectionSet */
+
 /**
  * Returns the percentage position (between -100-100) of score between minScore and maxScore.
  * @param {number} score
@@ -13,4 +18,15 @@ export function getScaledScoreFromMinMax(score, minScore, maxScore) {
   const range = (score < 0) ? Math.abs(minScore) : maxScore;
   if (!range) return 0;
   return Math.round((score / range) * 100);
+}
+
+/**
+ * Returns the average scaledScore for the specified sets.
+ * @param {IntersectionSet[]} sets
+ * @returns {number}
+ */
+export function getAverageScaledScore(sets) {
+  const count = sets?.length;
+  if (!count) return 0;
+  return Math.round(sum(sets, 'averageScaledScore') / count);
 }

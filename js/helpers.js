@@ -6,7 +6,8 @@ import {
   sum
 } from './utils/math';
 import {
-  getScaledScoreFromMinMax
+  getScaledScoreFromMinMax,
+  getAverageScaledScore
 } from './utils/scoring';
 /** @typedef {import("./IntersectionSet").default} IntersectionSet */
 
@@ -45,6 +46,8 @@ const helpers = {
    * @see {@link ../INTERSECTION_QUERY.md INTERSECTION_QUERY}
    * @example {{{scoreQuery '#this'}}} - score for this model
    * @example {{{scoreQuery '#this total'}}} - summed score for sets which intersect this model and are included in the total
+   * @example {{{scoreQuery 'assessment'}}} - summed score for all assessments
+   * @example {{{scoreQuery 'total'}}} - score for `TotalSets`
    * @param {string} query
    * @param {*} context
    * @returns {number}
@@ -59,6 +62,8 @@ const helpers = {
    * @see {@link ../INTERSECTION_QUERY.md INTERSECTION_QUERY}
    * @example {{{scaledScoreQuery '#this'}}} - scaledScore for this model
    * @example {{{scaledScoreQuery '#this total'}}} - scaledScore for sets which intersect this model and are included in the total
+   * @example {{{scoreQuery 'assessment'}}} - summed scaledScore for all assessments
+   * @example {{{scaledScoreQuery 'total'}}} - scaledScore for `TotalSets`
    * @param {string} query
    * @param {*} context
    * @returns {number}
@@ -69,6 +74,22 @@ const helpers = {
     const minScore = sum(sets, 'minScore');
     const maxScore = sum(sets, 'maxScore');
     return getScaledScoreFromMinMax(score, minScore, maxScore);
+  },
+
+  /**
+   * Returns the average scaledScore for the intersected subsets of the intersection query string.
+   * @see {@link ../INTERSECTION_QUERY.md INTERSECTION_QUERY}
+   * @example {{{averageScaledScoreQuery '#this'}}} - avaerage scaledScore for this model
+   * @example {{{averageScaledScoreQuery '#this total'}}} - average scaledScore for sets which intersect this model and are included in the total
+   * @example {{{averageScaledScoreQuery 'assessment'}}} - average scaledScore for all assessments
+   * @example {{{averageScaledScoreQuery 'total'}}} - average scaledScore for `TotalSets`
+   * @param {string} query
+   * @param {*} context
+   * @returns {number}
+   */
+  averageScaledScoreQuery(query, context) {
+    const sets = getSubsetsFromQueryContext(query, context);
+    return getAverageScaledScore(sets);
   }
 };
 

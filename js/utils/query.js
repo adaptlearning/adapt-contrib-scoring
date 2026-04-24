@@ -10,6 +10,7 @@ import {
   matrixMultiply,
   unique
 } from './math';
+/** @typedef {import("../IntersectionSet").default} IntersectionSet */
 
 const queryColumnRegEx = /([^ []*(?:[[(]{1}[^\])]+[\])]{1})*)/g;
 const queryColumnAttributeRegEx = /[[(]{1}[^\])]+[\])]{1}/g;

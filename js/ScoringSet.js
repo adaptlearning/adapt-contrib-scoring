@@ -115,10 +115,20 @@ export default class ScoringSet extends LifecycleSet {
 
   /**
    * Returns a percentage score relative to a positive minimum or zero and maximum values.
+   * Each set's influence scales with its point range when scaledScores are summed across sets.
    * @returns {number}
    */
   get scaledScore() {
     return getScaledScoreFromMinMax(this.score, this.minScore, this.maxScore);
+  }
+
+  /**
+   * Returns the average scaledScore. For a single set this equals scaledScore.
+   * Each set contributes equally regardless of its point range when aggregated.
+   * @returns {number}
+   */
+  get averageScaledScore() {
+    return this.scaledScore;
   }
 
   /**

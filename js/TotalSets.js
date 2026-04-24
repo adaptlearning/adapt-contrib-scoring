@@ -13,6 +13,9 @@ import {
   unique,
   sum
 } from './utils/math';
+import {
+  getAverageScaledScore
+} from './utils/scoring';
 
 /**
  * A set of sets, it can sum the scores of the registered or intersecting sets.
@@ -114,6 +117,15 @@ export default class TotalSets extends ScoringSet {
    */
   get score() {
     return sum(this.scoringSets, 'score');
+  }
+
+  /**
+   * Returns the average scaledScore across all `_isScoreIncluded` subsets.
+   * @override
+   * @returns {number}
+   */
+  get averageScaledScore() {
+    return getAverageScaledScore(this.scoringSets);
   }
 
   /**
