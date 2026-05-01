@@ -54,7 +54,6 @@ export default class TotalSets extends ScoringSet {
   /**
    * Returns all models from sets marked with `_isScoreIncluded` or `_isCompletionRequired`, filtered and intersected where appropriate.
    * @override
-   * @returns {Backbone.Model[]}
    */
   get models() {
     const allScoringSets = Adapt.scoring.sets.filter(({ isScoreIncluded }) => isScoreIncluded);
@@ -95,7 +94,6 @@ export default class TotalSets extends ScoringSet {
   /**
    * Returns the minimum score of all `_isScoreIncluded` subsets.
    * @override
-   * @returns {number}
    */
   get minScore() {
     return sum(this.scoringSets, 'minScore');
@@ -104,7 +102,6 @@ export default class TotalSets extends ScoringSet {
   /**
    * Returns the maximum score of all `_isScoreIncluded` subsets.
    * @override
-   * @returns {number}
    */
   get maxScore() {
     return sum(this.scoringSets, 'maxScore');
@@ -113,7 +110,6 @@ export default class TotalSets extends ScoringSet {
   /**
    * Returns the score of all `_isScoreIncluded` subsets.
    * @override
-   * @returns {number}
    */
   get score() {
     return sum(this.scoringSets, 'score');
@@ -122,26 +118,17 @@ export default class TotalSets extends ScoringSet {
   /**
    * Returns the average scaledScore across all `_isScoreIncluded` subsets.
    * @override
-   * @returns {number}
    */
   get averageScaledScore() {
     return getAverageScaledScore(this.scoringSets);
   }
 
-  /**
-   * Returns the number of correctly answered available questions.
-   * @override
-   * @returns {number}
-   */
+  /** @override */
   get correctness() {
     return sum(this.scoringSets, 'correctness');
   }
 
-  /**
-   * Returns the number of available questions.
-   * @override
-   * @returns {number}
-   */
+  /** @override */
   get maxCorrectness() {
     return sum(this.scoringSets, 'maxCorrectness');
   }
@@ -157,7 +144,6 @@ export default class TotalSets extends ScoringSet {
   /**
    * Returns whether all registered sets marked with `_isCompletionRequired` are completed.
    * @override
-   * @returns {boolean}
    */
   get isComplete() {
     const completionSets = this.completionSets;
@@ -169,7 +155,6 @@ export default class TotalSets extends ScoringSet {
    * If passmark is disabled, don't evaluate.
    * If _passmark._requiresPassedSubsets then all scoring subsets have to be passed.
    * @override
-   * @returns {boolean|null}
    */
   get isPassed() {
     if (!this.hasPassmark) return null;
@@ -185,7 +170,6 @@ export default class TotalSets extends ScoringSet {
    * Returns whether any registered sets marked with `_isScoreIncluded` are failed and cannot be reset.
    * If passmark is disabled, don't evaluate.
    * @override
-   * @returns {boolean|null}
    */
   get isFailed() {
     if (!this.hasPassmark) return null;
@@ -195,10 +179,9 @@ export default class TotalSets extends ScoringSet {
   /**
    * Returns whether any registered sets marked with `_isScoreIncluded` can be reset.
    * @override
-   * @returns {boolean}
    */
   get canReset() {
-    return this.scoringSets.some(set => set?.canReset);
+    return this.scoringSets.some(set => set.canReset);
   }
 
   /** @override */

@@ -259,7 +259,7 @@ export default class ScoringSet extends LifecycleSet {
    */
   get isFailed() {
     if (!this.hasPassmark) return null;
-    return this.isComplete && this.isPassed === false;
+    return this.isComplete && !this.isPassed;
   }
 
   /**

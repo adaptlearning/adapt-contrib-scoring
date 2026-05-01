@@ -2,6 +2,7 @@ import Data from 'core/js/data';
 import Adapt from 'core/js/adapt';
 import AdaptModelSet from './AdaptModelSet';
 import {
+  filterSetsByIntersectingModels,
   filterSetsByIntersectingModelId,
   filterSetsByLocalModelId,
   filterSetsByModelId,
@@ -166,13 +167,11 @@ export default class Lifecycle extends Backbone.Controller {
   }
 
   /**
-   * Adds sets to the reset phase which are on the set.modelId.
+   * Adds sets to the reset phase which intersect the set models.
    * @param {IntersectionSet} set
    */
   onScoringSetReset(set) {
-    // TODO: determine if we should restart the sets on this model id only or all descendant sets as well
-    if (!set.model) return;
-    const sets = filterSetsByModelId(getAllSets(), set.modelId);
+    const sets = filterSetsByIntersectingModels(getAllSets(), set.models);
     this.restart(sets);
   }
 
