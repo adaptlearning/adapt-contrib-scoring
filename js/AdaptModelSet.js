@@ -1,97 +1,91 @@
 import ScoringSet from './ScoringSet';
-import {
-  isAvailableInHierarchy
-} from './utils';
+import data from 'core/js/data';
 
+/**
+ * A set which represents each AdaptModel from the `core/js/data` API.
+ * Used for set intersection queries only, not for scoring.
+ */
 export default class AdaptModelSet extends ScoringSet {
 
-  initialize(options = {}, subsetParent = null) {
-    this._model = options.model;
+  initialize(options = {}) {
     super.initialize({
-      ...options,
-      _id: this.model.get('_id'),
+      _id: options._model.get('_id'),
       _type: 'adapt',
-      title: this.model.get('title')
-    }, subsetParent);
+      _title: options._model.get('title'),
+      _models: [options._model],
+      ...options
+    });
   }
 
   /**
-   * Intentionally empty to override super Class
-   * @override
+   * Comparison function for type groups.
+   * query example: `[modelTypeGroup=question]`
+   * @param {string} group One of course|contentobject|menu|page|group|article|block|component|question
+   * @returns {boolean}
    */
-  _initializeObjective() {}
-
-  /**
-   * Intentionally empty to override super Class
-   * @override
-   */
-  _resetObjective() {}
-
-  /**
-   * Intentionally empty to override super Class
-   * @override
-   */
-  _completeObjective() {}
-
-  /**
-   * Intentionally empty to prevent super Class event triggers
-   * @override
-   */
-  update() {}
-
-  modelTypeGroup(group) {
-    return this.model.isTypeGroup(group);
+  modelTypeGroup(typeGroup) {
+    return this.model.isTypeGroup(typeGroup);
   }
 
+  /**
+   * Comparison property for model types.
+   * query example: `[modelType=block]`
+   * @returns {string} One of course|menu|page|article|block|component
+   */
   get modelType() {
     return this.model.get('_type');
   }
 
+  /**
+   * Comparison property for model component strings.
+   * query example: `[modelComponent=mcq]`
+   * @returns {string} One of mcq|gmcq|slider|graphic|... etc
+   */
   get modelComponent() {
     return this.model.get('_component');
   }
 
-  get model() {
-    return this._model;
+  /** @override */
+  get order() {
+    if (!data.isReady) return 0;
+    // Reverse order by ancestor distance such that children execute first and parents last
+    return 100 - this.model.getAncestorModels(true).length;
   }
 
-  /**
-   * @override
-   */
-  get rawModels() {
-    return [this.model];
-  }
-
-  /**
-   * @override
-   */
-  get isAvailable() {
-    return isAvailableInHierarchy(this.model);
-  }
-
-  /**
-   * @override
-   */
-  get isComplete() {
-    return this.model.get('_isComplete');
-  }
-
-  /**
-   * @override
-   */
+  /** @override */
   get isPassed() {
     return null;
   }
 
-  /**
-   * Intentionally empty to prevent super Class event triggers
-   * @override
-   */
-  onCompleted() {}
+  /** @override */
+  get isFailed() {
+    return null;
+  }
 
-  /**
-   * Intentionally empty to prevent super Class event triggers
-   * @override
-   */
-  onPassed() {}
+  /** @override */
+  get isOptional() {
+    return this.model.get('_isOptional');
+  }
+
+  /** @override */
+  get isAvailable() {
+    return this.model.get('_isAvailable');
+  }
+
+  get feedback() {
+    if (!this.isSubmitted) return;
+    return this.model.getFeedback();
+  }
+
+  /** @override */
+  get journal() {
+    return null;
+  }
+
+  /** @override */
+  get objective() {
+    if (!this.model.get('_recordObjective')) return;
+    return super.objective;
+  }
+
 }

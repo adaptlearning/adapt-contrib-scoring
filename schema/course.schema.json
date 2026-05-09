@@ -65,13 +65,13 @@
                   "default": true
                 }
               }
+            },
+            "_isBackwardCompatible": {
+              "type": "boolean",
+              "title": "Enable backward compatibility",
+              "description": "Determines whether to use legacy assessment events and state for backward compatibility with other plugins",
+              "default": false
             }
-          },
-          "_isBackwardCompatible": {
-            "type": "boolean",
-            "title": "Enable backward compatibility",
-            "description": "Determines whether to use legacy assessment events and state for backward compatibility with other plugins",
-            "default": false
           }
         }
       }
