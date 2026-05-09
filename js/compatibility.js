@@ -3,6 +3,7 @@ import {
   findSetById
 } from './utils/sets';
 /** @typedef {import("./adapt-contrib-scoring").Scoring} Scoring */
+/** @typedef {import("./TotalSets").default} TotalSets */
 
 // Compatibility layer for adapt-contrib-assessment components and extensions
 
@@ -24,7 +25,7 @@ export function setupBackwardCompatibility(scoring) {
     get: id => {
       return findSetById(Adapt.scoring.sets, id)?.model;
     },
-    getState: () => getCompatibilityState(scoring)
+    getState: () => getCompatibilityState(scoring.total)
   };
   Adapt
     .off('scoring:total:restored', onScoringRestored)
@@ -36,43 +37,43 @@ export function setupBackwardCompatibility(scoring) {
 
 /**
  * Polyfill for assessmentState.
- * @param {Scoring} scoring
+ * @param {TotalSets} total
  */
-export function getCompatibilityState(scoring) {
+export function getCompatibilityState(total) {
   const state = {
-    isComplete: scoring.total.isComplete,
-    isPercentageBased: scoring.total.passmark.isScaled,
-    isPass: scoring.total.isPassed ?? scoring.total.isComplete,
-    maxScore: scoring.total.maxScore,
-    minScore: scoring.total.minScore,
-    score: scoring.total.score,
-    scoreToPass: scoring.total.passmark.score,
-    scoreAsPercent: scoring.total.scaledScore,
-    correctCount: scoring.total.correctness,
-    correctAsPercent: scoring.total.scaledCorrectness,
-    correctToPass: scoring.total.passmark.correctness,
-    questionCount: scoring.total.availableQuestions.length,
-    assessmentsComplete: scoring.total.scoringSets.filter(set => set.isComplete).length,
-    assessments: scoring.total.scoringSets.length,
-    canRetry: scoring.total.canReset
+    isComplete: total.isComplete,
+    isPercentageBased: total.passmark.isScaled,
+    isPass: total.isPassed ?? total.isComplete,
+    maxScore: total.maxScore,
+    minScore: total.minScore,
+    score: total.score,
+    scoreToPass: total.passmark.score,
+    scoreAsPercent: total.scaledScore,
+    correctCount: total.correctness,
+    correctAsPercent: total.scaledCorrectness,
+    correctToPass: total.passmark.correctness,
+    questionCount: total.availableQuestions.length,
+    assessmentsComplete: total.scoringSets.filter(set => set.isComplete).length,
+    assessments: total.scoringSets.length,
+    canRetry: total.canReset
   };
   return state;
 }
 
 /**
  * Polyfill for triggering assessment:restored event.
- * @param {Scoring} scoring
+ * @param {TotalSets} total
  * @fires Adapt#assessment:restored
  */
-function onScoringRestored(scoring) {
-  Adapt.trigger('assessment:restored', getCompatibilityState(scoring));
+function onScoringRestored(total) {
+  Adapt.trigger('assessment:restored', getCompatibilityState(total));
 }
 
 /**
  * Polyfill for triggering assessment:complete event.
- * @param {Scoring} scoring
+ * @param {TotalSets} total
  * @fires Adapt#assessment:complete
  */
-function onScoringComplete(scoring) {
-  Adapt.trigger('assessment:complete', getCompatibilityState(scoring));
+function onScoringComplete(total) {
+  Adapt.trigger('assessment:complete', getCompatibilityState(total));
 }
